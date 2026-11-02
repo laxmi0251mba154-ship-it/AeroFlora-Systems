@@ -18,6 +18,7 @@ import {
   Scale,
   Award,
 } from 'lucide-react';
+import { IMAGES } from '../assets/images';
 
 interface VentureOverviewProps {
   onStartSimulation: () => void;
@@ -123,7 +124,7 @@ export const VentureOverview: React.FC<VentureOverviewProps> = ({
           <div className="lg:col-span-5">
             <div className="relative rounded-2xl overflow-hidden border border-slate-200/90 shadow-md aspect-video lg:aspect-4/3 bg-slate-900">
               <img
-                src="/src/assets/images/aeroflora_tower_desert_1793610371842.jpg"
+                src={IMAGES.towerDesert}
                 alt="AeroFlora Biomimetic Atmospheric Water Harvesting Tower in Southern Arizona Desert"
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
@@ -244,7 +245,7 @@ export const VentureOverview: React.FC<VentureOverviewProps> = ({
           <div className="lg:col-span-5 order-2 lg:order-1">
             <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm aspect-video bg-slate-100">
               <img
-                src="/src/assets/images/arizona_orchard_drought_1793610371789.jpg"
+                src={IMAGES.orchardDrought}
                 alt="Off-Grid Pecan Orchard in Cochise County Arizona"
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"

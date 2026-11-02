@@ -6,6 +6,7 @@
 import React from 'react';
 import { MineralProfile } from '../types/aeroflora';
 import { Sparkles, Layers, ShieldCheck, Check } from 'lucide-react';
+import { IMAGES } from '../assets/images';
 
 interface SolarMineralizationModuleProps {
   mineralProfile: MineralProfile;
@@ -42,7 +43,7 @@ export const SolarMineralizationModule: React.FC<SolarMineralizationModuleProps>
           <div className="lg:col-span-6">
             <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-white aspect-4/3 relative">
               <img
-                src="/src/assets/images/solar_mineralization_module_1793610372248.jpg"
+                src={IMAGES.solarMineralization}
                 alt="Solar Mineralization Chamber Cutaway Diagram"
                 className="w-full h-full object-contain p-2"
                 referrerPolicy="no-referrer"

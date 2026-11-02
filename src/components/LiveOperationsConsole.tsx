@@ -27,6 +27,7 @@ import {
   TrendingUp,
   Sparkles,
 } from 'lucide-react';
+import { IMAGES } from '../assets/images';
 
 interface LiveOperationsConsoleProps {
   simulation: SimulationResult;
@@ -233,7 +234,7 @@ export const LiveOperationsConsole: React.FC<LiveOperationsConsoleProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
               <div className="sm:col-span-7 relative rounded-xl overflow-hidden border border-slate-200 aspect-video bg-slate-950">
                 <img
-                  src="/src/assets/images/aeroflora_tower_desert_1793610371842.jpg"
+                  src={IMAGES.towerDesert}
                   alt="AeroFlora Tower Desert Installation"
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"

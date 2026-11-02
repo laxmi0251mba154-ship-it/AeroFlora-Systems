@@ -6,6 +6,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Header } from './components/Header';
 import { LiveOperationsConsole } from './components/LiveOperationsConsole';
+import { ResultsDisplayView } from './components/ResultsDisplayView';
 import { BiomimeticSimulationView } from './components/BiomimeticSimulationView';
 import { SolarMineralizationModule } from './components/SolarMineralizationModule';
 import { FinancialMetricsView } from './components/FinancialMetricsView';
@@ -219,6 +220,20 @@ export default function App() {
             onChangeEnvironmentalConditions={setEnvironmentalConditions}
             onOpenReport={() => setShowReportModal(true)}
             onOpenArrayMatrix={() => setShowComparisonModal(true)}
+          />
+        )}
+
+        {/* Tab 2: Results & Decision Recommendations (Mandate from Venture Quest) */}
+        {activeTab === 'results' && (
+          <ResultsDisplayView
+            simulation={simulation}
+            farmProfile={farmProfile}
+            businessInputs={businessInputs}
+            environmentalConditions={environmentalConditions}
+            onOpenReport={() => setShowReportModal(true)}
+            onExportCSV={handleExportCSV}
+            onOpenArrayMatrix={() => setShowComparisonModal(true)}
+            onSaveScenario={handleSaveScenario}
           />
         )}
 

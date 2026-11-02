@@ -45,7 +45,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Zone 2: Concise single-line nav links */}
-        <nav className="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-600">
+        <nav className="hidden md:flex items-center gap-5 text-xs font-semibold text-slate-600">
           <button
             type="button"
             onClick={() => onSelectTab('live')}
@@ -56,6 +56,17 @@ export const Header: React.FC<HeaderProps> = ({
             }`}
           >
             Live Console
+          </button>
+          <button
+            type="button"
+            onClick={() => onSelectTab('results')}
+            className={`whitespace-nowrap shrink-0 transition-colors py-1 cursor-pointer ${
+              activeTab === 'results'
+                ? 'text-cyan-900 font-bold border-b-2 border-cyan-800'
+                : 'hover:text-slate-900'
+            }`}
+          >
+            Results &amp; Decisions
           </button>
           <button
             type="button"
