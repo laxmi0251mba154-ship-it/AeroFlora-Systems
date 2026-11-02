@@ -37,6 +37,7 @@ export const DeployVercelModal: React.FC<DeployVercelModalProps> = ({
 
   const vercelJsonConfig = `{
   "framework": "vite",
+  "installCommand": "npm install --legacy-peer-deps",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
