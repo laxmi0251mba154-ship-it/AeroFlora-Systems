@@ -111,3 +111,95 @@ export interface ActivityLog {
   details: string;
   status: 'nominal' | 'calibrated' | 'verified' | 'warning';
 }
+
+export type UserRole = 'farmer' | 'agronomist' | 'technician' | 'fpo_admin' | 'platform_admin';
+
+export interface PlotRecord {
+  id: string;
+  name: string;
+  areaAcres: number;
+  cropCategory: string;
+  cropId: string;
+  cropVariety: string;
+  growthStage: 'initial' | 'development' | 'mid_season' | 'late_season';
+  soilType: string;
+  irrigationMethod: 'drip' | 'sprinkler' | 'flood_furrow' | 'micro_jet';
+  existingWaterSource: 'deep_borewell' | 'open_dug_well' | 'canal' | 'private_tanker' | 'rainwater_pond';
+  dailyWaterAvailabilityLiters: number;
+  monthlyWaterExpenseInr: number;
+  storageCapacityLiters: number;
+  hasWaterQualityReport: boolean;
+}
+
+export interface IndianFarmerProfile {
+  id: string;
+  fullName: string;
+  mobileNumber: string;
+  email?: string;
+  preferredLanguage: string;
+  state: string;
+  district: string;
+  blockTehsil: string;
+  village: string;
+  coordinatesConsent: boolean;
+  latitude?: number;
+  longitude?: number;
+  farms: {
+    id: string;
+    farmName: string;
+    totalAcres: number;
+    plots: PlotRecord[];
+  }[];
+}
+
+export interface EquipmentTower {
+  id: string;
+  serialNumber: string;
+  nickname: string;
+  villageLocation: string;
+  district: string;
+  state: string;
+  installationDate: string;
+  sorbentMaterial: 'MOF-801' | 'MIL-101(Cr)' | 'Aluminum Fumarate' | 'Zeolite 13X';
+  sorbentMassKg: number;
+  status: 'adsorbing' | 'desorbing' | 'condensation' | 'standby' | 'maintenance';
+  coreTemperatureC: number;
+  sorbentBedRHPct: number;
+  dailyYieldLiters: number;
+  targetDailyYieldLiters: number;
+  lifetimeAccumulatedLiters: number;
+  condenserPlateTempC: number;
+  esp32Telemetry: {
+    status: 'online' | 'offline' | 'degraded';
+    signalRssi: number; // dBm
+    firmwareVersion: string;
+    solarVolts: number;
+    batteryPct: number;
+    lastPing: string;
+  };
+  filterCartridgeDaysRemaining: number;
+  nextDesorptionScheduled: string;
+}
+
+export interface FPONetworkProfile {
+  id: string;
+  fpoName: string;
+  registrationNumber: string;
+  district: string;
+  state: string;
+  activeFarmersCount: number;
+  sharedTowersCount: number;
+  communalTankCapacityLitres: number;
+  totalWaterDisbursedThisSeasonLiters: number;
+  waterTokenBalanceLiters: number;
+  announcements: {
+    id: string;
+    date: string;
+    author: string;
+    role: string;
+    title: string;
+    body: string;
+    isUrgent: boolean;
+  }[];
+}
+

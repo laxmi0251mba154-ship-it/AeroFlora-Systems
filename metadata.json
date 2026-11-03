@@ -1,6 +1,6 @@
 {
   "name": "AeroFlora Systems",
-  "description": "Biomimetic passive atmospheric water harvesting and solar mineralization engineering prototype for off-grid tree-nut growers in Southern Arizona.",
+  "description": "India-first farm water intelligence and atmospheric water harvesting platform connecting farmers, micro-climate data, FAO-56 crop planning, and solar mineralized water recovery.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

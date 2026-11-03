@@ -1,147 +1,200 @@
 /**
- * AeroFlora Systems - Top Bar Component
- * Clean, modern 3-zone live operational navigation
+ * AeroFlora Systems - Top Bar & Navigation Component
+ * Professional deep forest green branding with India-first language selector
  */
 
-import React from 'react';
-import { CloudUpload, FileText, Scale } from 'lucide-react';
+import React, { useState } from 'react';
+import {
+  Droplets,
+  Sparkles,
+  HelpCircle,
+  Menu,
+  X,
+  Languages,
+  Layers,
+  ChevronDown,
+  Building,
+  User,
+  ShieldCheck,
+  TrendingUp,
+  Cpu,
+  FileText,
+  Sliders,
+  Compass,
+} from 'lucide-react';
+import { SUPPORTED_LANGUAGES, SupportedLanguage, TRANSLATIONS } from '../utils/i18n';
+import { UserRole } from '../types/aeroflora';
 
 interface HeaderProps {
   activeTab: string;
   onSelectTab: (tab: string) => void;
-  onOpenDeployModal: () => void;
+  currentLanguage: SupportedLanguage;
+  onChangeLanguage: (lang: SupportedLanguage) => void;
+  currentRole: UserRole;
   onOpenReportModal: () => void;
-  onOpenArrayMatrix: () => void;
   onOpenGuide: () => void;
+  onOpenAssistant: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   activeTab,
   onSelectTab,
-  onOpenDeployModal,
+  currentLanguage,
+  onChangeLanguage,
+  currentRole,
   onOpenReportModal,
-  onOpenArrayMatrix,
   onOpenGuide,
+  onOpenAssistant,
 }) => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.en;
+
+  const navItems = [
+    { key: 'overview', label: t.nav_overview || 'Overview', icon: Compass },
+    { key: 'farmer_farm', label: t.nav_farmer_farm || 'My Farm', icon: User },
+    { key: 'water_intel', label: t.nav_water_intel || 'Water Intelligence', icon: Droplets },
+    { key: 'simulator', label: t.nav_simulator || 'Simulator', icon: Sliders },
+    { key: 'cycle', label: t.nav_biomimetic || '24h Biomimetic', icon: Layers },
+    { key: 'crop_planner', label: t.nav_crop_planner || 'Crop Planner', icon: Layers },
+    { key: 'mineralization', label: t.nav_water_quality || 'Water Quality', icon: ShieldCheck },
+    { key: 'roi', label: t.nav_financial || 'Financial ROI', icon: TrendingUp },
+    { key: 'equipment', label: t.nav_equipment || 'Towers & IoT', icon: Cpu },
+    { key: 'community', label: t.nav_community || 'FPO Network', icon: Building },
+    { key: 'reports', label: t.nav_reports || 'Reports', icon: FileText },
+    { key: 'help', label: t.nav_help || 'Help & Support', icon: HelpCircle },
+    { key: 'admin', label: t.nav_admin || 'Admin Roles', icon: ShieldCheck },
+  ];
+
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-slate-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-6">
-        {/* Zone 1: Single text element wordmark */}
-        <div className="flex items-center gap-3 shrink-0">
-          <a
-            href="#live"
-            onClick={(e) => {
-              e.preventDefault();
-              onSelectTab('live');
-            }}
-            className="text-lg font-bold tracking-tight text-slate-900 whitespace-nowrap hover:text-cyan-900 transition-colors"
+    <header className="sticky top-0 z-40 bg-emerald-950 text-white border-b border-emerald-900 shadow-md">
+      {/* Upper Brand & Quick Utility Bar */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-4">
+        {/* Brand Wordmark */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => onSelectTab('overview')}
+            className="flex items-center gap-2.5 text-left group cursor-pointer"
           >
-            AeroFlora Systems
-          </a>
-          <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-mono text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Live Field Telemetry</span>
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-300">
+              <Droplets className="w-5 h-5 text-emerald-400" />
+            </div>
+            <div>
+              <span className="text-base font-extrabold tracking-tight text-white group-hover:text-emerald-300 transition-colors">
+                AeroFlora Systems
+              </span>
+              <span className="hidden sm:block text-[10px] text-emerald-300/80 -mt-0.5 font-medium">
+                Farm Water Intelligence · Designed for India
+              </span>
+            </div>
+          </button>
+
+          <span className="hidden lg:inline-flex items-center gap-1.5 text-[10px] font-mono text-emerald-300 bg-emerald-900/60 px-2 py-0.5 rounded border border-emerald-700/50">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>PM-KUSUM Ready</span>
           </span>
         </div>
 
-        {/* Zone 2: Concise single-line nav links */}
-        <nav className="hidden md:flex items-center gap-5 text-xs font-semibold text-slate-600">
+        {/* Action Controls & Language Selector */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* AI Assistant Quick Trigger */}
           <button
-            type="button"
-            onClick={() => onSelectTab('live')}
-            className={`whitespace-nowrap shrink-0 transition-colors py-1 cursor-pointer ${
-              activeTab === 'live'
-                ? 'text-cyan-900 font-bold border-b-2 border-cyan-800'
-                : 'hover:text-slate-900'
-            }`}
+            onClick={onOpenAssistant}
+            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-slate-950 text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
           >
-            Live Console
+            <Sparkles className="w-3.5 h-3.5 text-slate-950" />
+            <span className="hidden sm:inline">Kisan Jal Saathi (AI)</span>
+            <span className="sm:hidden">AI Saathi</span>
           </button>
-          <button
-            type="button"
-            onClick={() => onSelectTab('results')}
-            className={`whitespace-nowrap shrink-0 transition-colors py-1 cursor-pointer ${
-              activeTab === 'results'
-                ? 'text-cyan-900 font-bold border-b-2 border-cyan-800'
-                : 'hover:text-slate-900'
-            }`}
-          >
-            Results &amp; Decisions
-          </button>
-          <button
-            type="button"
-            onClick={() => onSelectTab('cycle')}
-            className={`whitespace-nowrap shrink-0 transition-colors py-1 cursor-pointer ${
-              activeTab === 'cycle'
-                ? 'text-cyan-900 font-bold border-b-2 border-cyan-800'
-                : 'hover:text-slate-900'
-            }`}
-          >
-            Biomimetic Engine
-          </button>
-          <button
-            type="button"
-            onClick={() => onSelectTab('mineralization')}
-            className={`whitespace-nowrap shrink-0 transition-colors py-1 cursor-pointer ${
-              activeTab === 'mineralization'
-                ? 'text-cyan-900 font-bold border-b-2 border-cyan-800'
-                : 'hover:text-slate-900'
-            }`}
-          >
-            Solar Mineralization
-          </button>
-          <button
-            type="button"
-            onClick={() => onSelectTab('roi')}
-            className={`whitespace-nowrap shrink-0 transition-colors py-1 cursor-pointer ${
-              activeTab === 'roi'
-                ? 'text-cyan-900 font-bold border-b-2 border-cyan-800'
-                : 'hover:text-slate-900'
-            }`}
-          >
-            Financial Pro-Forma
-          </button>
-          <button
-            type="button"
-            onClick={() => onSelectTab('scenarios')}
-            className={`whitespace-nowrap shrink-0 transition-colors py-1 cursor-pointer ${
-              activeTab === 'scenarios'
-                ? 'text-cyan-900 font-bold border-b-2 border-cyan-800'
-                : 'hover:text-slate-900'
-            }`}
-          >
-            Trial Logs
-          </button>
-        </nav>
 
-        {/* Zone 3: Actions */}
-        <div className="flex items-center gap-2.5 shrink-0">
+          {/* Guide Playbook */}
           <button
-            type="button"
             onClick={onOpenGuide}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-cyan-950 bg-cyan-50 hover:bg-cyan-100 border border-cyan-200 rounded-lg transition-colors cursor-pointer"
+            className="px-2.5 py-1.5 bg-emerald-900/70 hover:bg-emerald-800 text-emerald-100 text-xs font-medium rounded-lg border border-emerald-700/50 transition-colors flex items-center gap-1.5 cursor-pointer"
           >
-            <span className="w-4 h-4 rounded-full bg-cyan-900 text-white flex items-center justify-center text-[10px]">?</span>
-            <span>How to Use</span>
+            <HelpCircle className="w-3.5 h-3.5 text-emerald-300" />
+            <span className="hidden md:inline">Quick Guide</span>
           </button>
+
+          {/* Indian Language Selector */}
+          <div className="relative flex items-center">
+            <select
+              value={currentLanguage}
+              onChange={(e) => onChangeLanguage(e.target.value as SupportedLanguage)}
+              className="bg-emerald-900/80 text-emerald-100 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-emerald-700/60 focus:outline-none focus:ring-1 focus:ring-emerald-400 cursor-pointer"
+            >
+              {SUPPORTED_LANGUAGES.map((l) => (
+                <option key={l.code} value={l.code} className="bg-slate-900 text-white">
+                  {l.nativeName} ({l.code.toUpperCase()})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Mobile Menu Toggle Button */}
           <button
-            type="button"
-            onClick={onOpenReportModal}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden p-1.5 text-emerald-200 hover:text-white rounded-lg hover:bg-emerald-900 transition-colors cursor-pointer"
+            aria-label="Toggle Navigation Menu"
           >
-            <FileText className="w-3.5 h-3.5" />
-            <span>Audit PDF</span>
-          </button>
-          <button
-            type="button"
-            onClick={onOpenDeployModal}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-slate-900 rounded-lg hover:bg-cyan-950 transition-colors whitespace-nowrap shrink-0 shadow-sm cursor-pointer"
-          >
-            <CloudUpload className="w-3.5 h-3.5" />
-            <span>Cloud Deployment</span>
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </div>
+
+      {/* Horizontal Scrolling Tab Bar for Desktop */}
+      <div className="hidden lg:block bg-emerald-900/60 border-t border-emerald-800/60 overflow-x-auto scrollbar-none">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-1 py-1.5 text-xs font-semibold">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.key;
+
+            return (
+              <button
+                key={item.key}
+                onClick={() => onSelectTab(item.key)}
+                className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
+                  isActive
+                    ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm'
+                    : 'text-emerald-200/90 hover:text-white hover:bg-emerald-800/60'
+                }`}
+              >
+                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-slate-950' : 'text-emerald-400'}`} />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Mobile Drawer Overlay */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden bg-emerald-950 border-t border-emerald-800 p-4 space-y-2 animate-in slide-in-from-top-4">
+          <div className="grid grid-cols-2 gap-2">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.key;
+
+              return (
+                <button
+                  key={item.key}
+                  onClick={() => {
+                    onSelectTab(item.key);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`p-2.5 rounded-lg text-left text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors ${
+                    isActive
+                      ? 'bg-emerald-500 text-slate-950 font-bold'
+                      : 'bg-emerald-900/50 text-emerald-100 hover:bg-emerald-800'
+                  }`}
+                >
+                  <Icon className="w-4 h-4 shrink-0" />
+                  <span className="truncate">{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </header>
   );
 };

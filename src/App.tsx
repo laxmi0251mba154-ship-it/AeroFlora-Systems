@@ -1,20 +1,30 @@
 /**
- * @license
- * SPDX-License-Identifier: Apache-2.0
+ * AeroFlora Systems - Core Application
+ * India-First Farm Water Intelligence and Atmospheric Water Harvesting Platform
  */
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { Header } from './components/Header';
-import { LiveOperationsConsole } from './components/LiveOperationsConsole';
-import { ResultsDisplayView } from './components/ResultsDisplayView';
+import { OverviewDashboard } from './components/OverviewDashboard';
+import { FarmerRegistrationMyFarm } from './components/FarmerRegistrationMyFarm';
+import { WaterIntelligenceView } from './components/WaterIntelligenceView';
+import { AeroFloraEngineeringSimulator } from './components/AeroFloraEngineeringSimulator';
 import { BiomimeticSimulationView } from './components/BiomimeticSimulationView';
-import { SolarMineralizationModule } from './components/SolarMineralizationModule';
-import { FinancialMetricsView } from './components/FinancialMetricsView';
-import { ActivityLogsAndScenarios } from './components/ActivityLogsAndScenarios';
+import { CropWaterPlannerView } from './components/CropWaterPlannerView';
+import { WaterQualityMineralisationView } from './components/WaterQualityMineralisationView';
+import { FinancialPlannerROIView } from './components/FinancialPlannerROIView';
+import { TowerEquipmentManagementView } from './components/TowerEquipmentManagementView';
+import { CommunityFPONetworkView } from './components/CommunityFPONetworkView';
+import { ReportsDocumentsView } from './components/ReportsDocumentsView';
+import { HelpSupportView } from './components/HelpSupportView';
+import { AdminSystemManagementView } from './components/AdminSystemManagementView';
+import { ResultsDisplayView } from './components/ResultsDisplayView';
+import { LiveOperationsConsole } from './components/LiveOperationsConsole';
 import { ExecutiveReportModal } from './components/ExecutiveReportModal';
 import { DeployVercelModal } from './components/DeployVercelModal';
 import { ScenarioComparisonModal } from './components/ScenarioComparisonModal';
 import { QuickGuideModal } from './components/QuickGuideModal';
+import { KisanJalSaathiModal } from './components/KisanJalSaathiModal';
 import { runSimulation } from './utils/thermodynamics';
 import {
   DEFAULT_BUSINESS_INPUTS,
@@ -32,25 +42,65 @@ import {
   EnvironmentalConditions,
   FarmProfile,
   SavedScenario,
+  UserRole,
+  IndianFarmerProfile,
 } from './types/aeroflora';
-import {
-  CheckCircle,
-  FileText,
-  Sliders,
-  Wind,
-  Layers,
-  TrendingUp,
-  BookmarkCheck,
-  Scale,
-} from 'lucide-react';
+import { SupportedLanguage } from './utils/i18n';
+import { CheckCircle } from 'lucide-react';
+
+const DEFAULT_INDIAN_FARMER: IndianFarmerProfile = {
+  id: 'farmer-101',
+  fullName: 'Ramesh Patel',
+  mobileNumber: '9825012345',
+  email: 'ramesh.patel@agroindia.org',
+  preferredLanguage: 'en',
+  state: 'Gujarat',
+  district: 'Banaskantha',
+  blockTehsil: 'Deesa',
+  village: 'Rajpur',
+  coordinatesConsent: true,
+  latitude: 24.258,
+  longitude: 72.181,
+  farms: [
+    {
+      id: 'farm-1',
+      farmName: 'Shree Krishna Krishi Farm',
+      totalAcres: 5.0,
+      plots: [
+        {
+          id: 'plot-1',
+          name: 'Plot 1 - North Orchard',
+          areaAcres: 2.5,
+          cropCategory: 'Horticulture Fruits',
+          cropId: 'pomegranate',
+          cropVariety: 'Bhagwa (Sindhuri)',
+          growthStage: 'mid_season',
+          soilType: 'Sandy Loam',
+          irrigationMethod: 'drip',
+          existingWaterSource: 'deep_borewell',
+          dailyWaterAvailabilityLiters: 1200,
+          monthlyWaterExpenseInr: 8500,
+          storageCapacityLiters: 10000,
+          hasWaterQualityReport: true,
+        },
+      ],
+    },
+  ],
+};
 
 export default function App() {
-  // Default to live operational view for testing
-  const [activeTab, setActiveTab] = useState<string>('live');
+  // Navigation State - defaults to 'overview'
+  const [activeTab, setActiveTab] = useState<string>('overview');
+  const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>('en');
+  const [currentRole, setCurrentRole] = useState<UserRole>('farmer');
 
   // Core Persistent State
   const [farmProfile, setFarmProfile] = useState<FarmProfile>(() =>
     loadStoredData(STORAGE_KEYS.FARM_PROFILE, DEFAULT_FARM_PROFILE)
+  );
+
+  const [indianFarmerProfile, setIndianFarmerProfile] = useState<IndianFarmerProfile>(() =>
+    loadStoredData('AEROFLORA_INDIAN_FARMER_PROFILE', DEFAULT_INDIAN_FARMER)
   );
 
   const [businessInputs, setBusinessInputs] = useState<BusinessInputs>(() =>
@@ -74,12 +124,17 @@ export default function App() {
   const [showReportModal, setShowReportModal] = useState<boolean>(false);
   const [showComparisonModal, setShowComparisonModal] = useState<boolean>(false);
   const [showGuideModal, setShowGuideModal] = useState<boolean>(false);
+  const [showAssistantModal, setShowAssistantModal] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Sync to local storage
   useEffect(() => {
     saveStoredData(STORAGE_KEYS.FARM_PROFILE, farmProfile);
   }, [farmProfile]);
+
+  useEffect(() => {
+    saveStoredData('AEROFLORA_INDIAN_FARMER_PROFILE', indianFarmerProfile);
+  }, [indianFarmerProfile]);
 
   useEffect(() => {
     saveStoredData(STORAGE_KEYS.BUSINESS_INPUTS, businessInputs);
@@ -128,38 +183,12 @@ export default function App() {
     showToast('Scenario saved to persistent storage');
   };
 
-  const handleLoadScenario = (scenario: SavedScenario) => {
-    setFarmProfile(scenario.farmProfile);
-    setBusinessInputs(scenario.businessInputs);
-    setEnvironmentalConditions(scenario.environmentalConditions);
-    showToast(`Loaded "${scenario.name}"`);
-    setActiveTab('live');
-  };
-
-  const handleDeleteScenario = (id: string) => {
-    setScenarios((prev) => prev.filter((s) => s.id !== id));
-    showToast('Scenario deleted');
-  };
-
-  const handleAddLog = (action: string, details: string) => {
-    const newLog: ActivityLog = {
-      id: `log-${Date.now()}`,
-      timestamp: new Date().toLocaleString(),
-      action,
-      details,
-      status: 'nominal',
-    };
-    setActivityLogs((prev) => [newLog, ...prev]);
-    showToast('Trial record logged');
-  };
-
   const handleExportCSV = () => {
     const headers = [
       'Hour',
       'Phase',
       'Ambient RH (%)',
-      'Tower Core Temp (°C)',
-      'Absolute Humidity (g/m3)',
+      'Tower Temp (°C)',
       'Extraction Rate (L/hr)',
       'Cumulative (L)',
     ];
@@ -168,14 +197,12 @@ export default function App() {
       h.phase,
       h.ambientRH,
       h.towerTempC,
-      h.absoluteHumidityGramsPerM3,
       h.extractionRateLitersPerHour,
       h.cumulativeLiters,
     ]);
 
     const csvContent =
-      'data:text/csv;charset=utf-8,' +
-      [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+      'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
 
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
@@ -184,21 +211,24 @@ export default function App() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    showToast('CSV export downloaded');
   };
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-      {/* Live Operational Top Bar */}
+      {/* Top Navigation Bar with 13 Modules & Multi-Language Selector */}
       <Header
         activeTab={activeTab}
         onSelectTab={setActiveTab}
-        onOpenDeployModal={() => setShowDeployModal(true)}
+        currentLanguage={currentLanguage}
+        onChangeLanguage={setCurrentLanguage}
+        currentRole={currentRole}
         onOpenReportModal={() => setShowReportModal(true)}
-        onOpenArrayMatrix={() => setShowComparisonModal(true)}
         onOpenGuide={() => setShowGuideModal(true)}
+        onOpenAssistant={() => setShowAssistantModal(true)}
       />
 
-      {/* Floating Feedback Notification */}
+      {/* Floating Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 border border-slate-700">
           <CheckCircle className="w-4 h-4 text-emerald-400" />
@@ -206,24 +236,151 @@ export default function App() {
         </div>
       )}
 
-      {/* Main Operational Stage */}
+      {/* Main Content Stage */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Tab 1: Live Operations & Testing Console */}
-        {activeTab === 'live' && (
-          <LiveOperationsConsole
+        {/* Module 1: Overview Dashboard */}
+        {activeTab === 'overview' && (
+          <OverviewDashboard
             simulation={simulation}
             farmProfile={farmProfile}
-            onChangeFarmProfile={setFarmProfile}
             businessInputs={businessInputs}
-            onChangeBusinessInputs={setBusinessInputs}
             environmentalConditions={environmentalConditions}
-            onChangeEnvironmentalConditions={setEnvironmentalConditions}
+            currentLanguage={currentLanguage}
+            onNavigateTab={setActiveTab}
+            onOpenAssistant={() => setShowAssistantModal(true)}
             onOpenReport={() => setShowReportModal(true)}
-            onOpenArrayMatrix={() => setShowComparisonModal(true)}
           />
         )}
 
-        {/* Tab 2: Results & Decision Recommendations (Mandate from Venture Quest) */}
+        {/* Module 2: Farmer Registration and My Farm */}
+        {activeTab === 'farmer_farm' && (
+          <FarmerRegistrationMyFarm
+            farmerProfile={indianFarmerProfile}
+            onUpdateFarmerProfile={setIndianFarmerProfile}
+            currentLanguage={currentLanguage}
+            onShowToast={showToast}
+          />
+        )}
+
+        {/* Module 3: Water Intelligence */}
+        {activeTab === 'water_intel' && (
+          <WaterIntelligenceView
+            currentLanguage={currentLanguage}
+            onApplyConditionsToSimulator={(rh, tempC) => {
+              setEnvironmentalConditions((prev) => ({
+                ...prev,
+                ambientRelativeHumidity: rh,
+                daytimePeakTempC: tempC,
+              }));
+              setActiveTab('simulator');
+            }}
+            onShowToast={showToast}
+          />
+        )}
+
+        {/* Module 4: AeroFlora Live Simulator */}
+        {(activeTab === 'simulator' || activeTab === 'live') && (
+          <AeroFloraEngineeringSimulator
+            currentLanguage={currentLanguage}
+            onShowToast={showToast}
+            onApplyArrayUnitsToSystem={(units) => {
+              setEnvironmentalConditions((prev) => ({ ...prev, towerUnits: units }));
+            }}
+          />
+        )}
+
+        {/* Module 5: Biomimetic 24-Hour Engine */}
+        {activeTab === 'cycle' && (
+          <BiomimeticSimulationView
+            simulation={simulation}
+            environmentalConditions={environmentalConditions}
+            onUpdateRH={(rh) =>
+              setEnvironmentalConditions((prev) => ({
+                ...prev,
+                ambientRelativeHumidity: rh,
+              }))
+            }
+          />
+        )}
+
+        {/* Module 6: Crop Water Planner */}
+        {activeTab === 'crop_planner' && (
+          <CropWaterPlannerView
+            currentLanguage={currentLanguage}
+            onApplyTowerUnitsToSimulator={(units) => {
+              setEnvironmentalConditions((prev) => ({ ...prev, towerUnits: units }));
+              setActiveTab('simulator');
+            }}
+            onShowToast={showToast}
+          />
+        )}
+
+        {/* Module 7: Water Quality and Mineralisation */}
+        {activeTab === 'mineralization' && (
+          <WaterQualityMineralisationView
+            currentLanguage={currentLanguage}
+            onShowToast={showToast}
+          />
+        )}
+
+        {/* Module 8: Financial Planner and ROI */}
+        {activeTab === 'roi' && (
+          <FinancialPlannerROIView
+            currentLanguage={currentLanguage}
+            towerUnits={environmentalConditions.towerUnits}
+            onShowToast={showToast}
+            onOpenReport={() => setShowReportModal(true)}
+          />
+        )}
+
+        {/* Module 9: Tower and Equipment Management */}
+        {activeTab === 'equipment' && (
+          <TowerEquipmentManagementView
+            currentLanguage={currentLanguage}
+            onShowToast={showToast}
+          />
+        )}
+
+        {/* Module 10: Community and FPO Network */}
+        {activeTab === 'community' && (
+          <CommunityFPONetworkView
+            currentLanguage={currentLanguage}
+            onShowToast={showToast}
+          />
+        )}
+
+        {/* Module 11: Reports and Documents */}
+        {activeTab === 'reports' && (
+          <ReportsDocumentsView
+            simulation={simulation}
+            farmProfile={farmProfile}
+            businessInputs={businessInputs}
+            environmentalConditions={environmentalConditions}
+            currentLanguage={currentLanguage}
+            onShowToast={showToast}
+            onOpenAuditModal={() => setShowReportModal(true)}
+          />
+        )}
+
+        {/* Module 12: Help and Support */}
+        {activeTab === 'help' && (
+          <HelpSupportView
+            currentLanguage={currentLanguage}
+            onShowToast={showToast}
+          />
+        )}
+
+        {/* Module 13: Admin and System Management */}
+        {activeTab === 'admin' && (
+          <AdminSystemManagementView
+            currentRole={currentRole}
+            onChangeRole={setCurrentRole}
+            currentLanguage={currentLanguage}
+            onShowToast={showToast}
+          />
+        )}
+
+        {/* Specialized Results & Decisions View */}
         {activeTab === 'results' && (
           <ResultsDisplayView
             simulation={simulation}
@@ -236,77 +393,33 @@ export default function App() {
             onSaveScenario={handleSaveScenario}
           />
         )}
-
-        {/* Tab 2: Biomimetic Condensation Engine Deep-Dive */}
-        {activeTab === 'cycle' && (
-          <div className="space-y-6">
-            <BiomimeticSimulationView
-              simulation={simulation}
-              environmentalConditions={environmentalConditions}
-              onUpdateRH={(rh) =>
-                setEnvironmentalConditions((prev) => ({
-                  ...prev,
-                  ambientRelativeHumidity: rh,
-                }))
-              }
-            />
-          </div>
-        )}
-
-        {/* Tab 3: Solar Mineralization Module */}
-        {activeTab === 'mineralization' && (
-          <SolarMineralizationModule mineralProfile={simulation.mineralProfile} />
-        )}
-
-        {/* Tab 4: Financial Pro-Forma & Savings */}
-        {activeTab === 'roi' && (
-          <FinancialMetricsView
-            simulation={simulation}
-            businessInputs={businessInputs}
-            farmProfile={farmProfile}
-            environmentalConditions={environmentalConditions}
-            onOpenReport={() => setShowReportModal(true)}
-          />
-        )}
-
-        {/* Tab 5: Saved Scenarios & Field Logs */}
-        {activeTab === 'scenarios' && (
-          <ActivityLogsAndScenarios
-            scenarios={scenarios}
-            onLoadScenario={handleLoadScenario}
-            onDeleteScenario={handleDeleteScenario}
-            activityLogs={activityLogs}
-            onAddLog={handleAddLog}
-            onExportCSV={handleExportCSV}
-          />
-        )}
       </main>
 
-      {/* Quiet Operational Footer */}
-      <footer className="mt-12 bg-white border-t border-slate-200 py-6 text-xs text-slate-500">
+      {/* Operational Footer */}
+      <footer className="mt-12 bg-emerald-950 text-white border-t border-emerald-900 py-6 text-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-900">AeroFlora Systems</span>
-            <span>·</span>
-            <span>Autonomous Off-Grid Atmospheric Water Harvesting</span>
+            <span className="font-bold text-white">AeroFlora Systems</span>
+            <span className="text-emerald-400">·</span>
+            <span className="text-emerald-200">Farm Water Intelligence · Designed for India</span>
           </div>
-          <div className="flex items-center gap-4 text-slate-500 font-mono text-[11px]">
-            <span>Station ID: AZ-WILLCOX-01</span>
+          <div className="flex items-center gap-4 text-emerald-300 font-mono text-[11px]">
+            <span>PM-KUSUM Agri-Infra</span>
             <span aria-hidden="true">·</span>
             <button
               type="button"
               onClick={() => setShowReportModal(true)}
-              className="text-cyan-800 hover:underline cursor-pointer"
+              className="text-emerald-300 hover:text-white underline cursor-pointer"
             >
-              Academic Attestation &amp; Audit
+              Academic Dossier &amp; Audit
             </button>
             <span aria-hidden="true">·</span>
             <button
               type="button"
               onClick={() => setShowDeployModal(true)}
-              className="text-cyan-800 hover:underline cursor-pointer"
+              className="text-emerald-300 hover:text-white underline cursor-pointer"
             >
-              Cloud Deployment
+              Vercel Deployment
             </button>
           </div>
         </div>
@@ -329,7 +442,7 @@ export default function App() {
         onSelectTowerUnits={(units) => {
           setEnvironmentalConditions((prev) => ({ ...prev, towerUnits: units }));
           showToast(`Configured array to ${units} harvesting towers`);
-          setActiveTab('live');
+          setActiveTab('simulator');
         }}
       />
 
@@ -343,6 +456,19 @@ export default function App() {
         onClose={() => setShowGuideModal(false)}
         onStartTest={() => {
           showToast('Live Extraction Test Triggered');
+          setActiveTab('simulator');
+        }}
+      />
+
+      <KisanJalSaathiModal
+        isOpen={showAssistantModal}
+        onClose={() => setShowAssistantModal(false)}
+        currentLanguage={currentLanguage}
+        contextData={{
+          district: indianFarmerProfile.district,
+          crop: indianFarmerProfile.farms[0]?.plots[0]?.cropId,
+          acres: indianFarmerProfile.farms[0]?.totalAcres,
+          dailyHarvestLiters: simulation.totalDailyLiters,
         }}
       />
     </div>
