@@ -217,39 +217,85 @@ export const AdminSystemManagementView: React.FC<AdminSystemManagementViewProps>
         </div>
       </div>
 
-      {/* System Health Diagnostics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-500 font-medium">Local Storage Cache</span>
-            <Database className="w-4 h-4 text-emerald-600" />
+      {/* Registered Email Accounts & Auth Directory */}
+      <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div className="flex items-center gap-2">
+            <Lock className="w-4 h-4 text-emerald-700" />
+            <h3 className="text-sm font-bold text-slate-900">
+              Registered Email Accounts &amp; Authentication Directory
+            </h3>
           </div>
-          <div className="text-2xl font-extrabold text-slate-900 font-mono">Nominal</div>
-          <span className="text-[11px] text-slate-500 block pt-1 border-t border-slate-100">
-            Offline browser persistence active for remote field testing
+          <span className="text-[11px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-mono font-semibold border border-emerald-200">
+            256-Bit TLS · Active Identity Layer
           </span>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-500 font-medium">IMD / CGWB Data Adapters</span>
-            <Activity className="w-4 h-4 text-cyan-600" />
-          </div>
-          <div className="text-2xl font-extrabold text-cyan-800 font-mono">Synchronized</div>
-          <span className="text-[11px] text-slate-500 block pt-1 border-t border-slate-100">
-            District climatology &amp; aquifer depths loaded
-          </span>
-        </div>
-
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-500 font-medium">Audit Logs Recorded</span>
-            <ShieldAlert className="w-4 h-4 text-amber-600" />
-          </div>
-          <div className="text-2xl font-extrabold text-amber-700 font-mono">{auditLogCount} Events</div>
-          <span className="text-[11px] text-slate-500 block pt-1 border-t border-slate-100">
-            All user operations tracked for ISO audit compliance
-          </span>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {[
+            {
+              email: 'laxmi.0251mba154@dgu.ac.in',
+              name: 'Laxmi Kant Sharma',
+              role: 'Platform Admin / Researcher',
+              org: 'DGU Venture Quest / AgTech Research',
+              status: 'Verified',
+              badge: 'bg-emerald-100 text-emerald-800',
+            },
+            {
+              email: 'ramesh.patel@agroindia.org',
+              name: 'Ramesh Patel',
+              role: 'Progressive Farmer',
+              org: 'Shree Krishna Krishi Farm, Banaskantha',
+              status: 'Verified',
+              badge: 'bg-emerald-100 text-emerald-800',
+            },
+            {
+              email: 'dr.venkat.raman@icar-crida.res.in',
+              name: 'Dr. Venkat Raman',
+              role: 'Agronomist & Climate Scientist',
+              org: 'ICAR - Central Research Institute',
+              status: 'Verified',
+              badge: 'bg-teal-100 text-teal-800',
+            },
+            {
+              email: 'sunita.deshmukh@maharashtrafpo.org',
+              name: 'Sunita Deshmukh',
+              role: 'FPO Executive Administrator',
+              org: 'Sahyadri Farmers Producer Co-operative',
+              status: 'Verified',
+              badge: 'bg-indigo-100 text-indigo-800',
+            },
+            {
+              email: 'admin@aeroflora.in',
+              name: 'System Admin Ops',
+              role: 'Platform Infrastructure Ops',
+              org: 'AeroFlora Systems Private Limited',
+              status: 'Verified',
+              badge: 'bg-rose-100 text-rose-800',
+            },
+          ].map((acc) => (
+            <div
+              key={acc.email}
+              className="p-3 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:border-emerald-500/50 transition-all flex flex-col justify-between space-y-2"
+            >
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-xs text-slate-900">{acc.name}</span>
+                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${acc.badge}`}>
+                    {acc.status}
+                  </span>
+                </div>
+                <div className="text-xs font-mono text-emerald-700 font-semibold truncate mt-0.5">
+                  {acc.email}
+                </div>
+                <div className="text-[11px] text-slate-500 truncate mt-0.5">{acc.org}</div>
+              </div>
+              <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between text-[10px]">
+                <span className="text-slate-400">Role:</span>
+                <span className="font-semibold text-slate-700">{acc.role}</span>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

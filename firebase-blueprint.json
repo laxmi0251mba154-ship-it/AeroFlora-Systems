@@ -1,0 +1,50 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Registered agricultural user profile stored in Firestore.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth UID"
+        },
+        "email": {
+          "type": "string",
+          "description": "User email address"
+        },
+        "fullName": {
+          "type": "string",
+          "description": "User full name"
+        },
+        "role": {
+          "type": "string",
+          "description": "Agricultural user role such as farmer, agronomist, or researcher"
+        },
+        "photoURL": {
+          "type": "string",
+          "description": "User avatar image URL"
+        },
+        "emailVerified": {
+          "type": "boolean",
+          "description": "Email verification state"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of creation"
+        },
+        "lastLoginAt": {
+          "type": "string",
+          "description": "ISO timestamp of last login"
+        }
+      },
+      "required": ["uid", "email", "fullName"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User document storing agricultural profile and preferences, accessible by the user."
+    }
+  }
+}

@@ -25,6 +25,10 @@ import { DeployVercelModal } from './components/DeployVercelModal';
 import { ScenarioComparisonModal } from './components/ScenarioComparisonModal';
 import { QuickGuideModal } from './components/QuickGuideModal';
 import { KisanJalSaathiModal } from './components/KisanJalSaathiModal';
+import { AuthModal } from './components/AuthModal';
+import { LoginPage } from './components/LoginPage';
+import { useAuth } from './context/AuthContext';
+import { AuthUser } from './types/auth';
 import { runSimulation } from './utils/thermodynamics';
 import {
   DEFAULT_BUSINESS_INPUTS,
@@ -46,7 +50,7 @@ import {
   IndianFarmerProfile,
 } from './types/aeroflora';
 import { SupportedLanguage } from './utils/i18n';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, RefreshCw, Droplets } from 'lucide-react';
 
 const DEFAULT_INDIAN_FARMER: IndianFarmerProfile = {
   id: 'farmer-101',
@@ -126,6 +130,47 @@ export default function App() {
   const [showGuideModal, setShowGuideModal] = useState<boolean>(false);
   const [showAssistantModal, setShowAssistantModal] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Real Firebase Authentication Hook
+  const {
+    currentUser,
+    loading: authLoading,
+    needsEmailVerification,
+    guestPreviewMode,
+    logout,
+    exitGuestPreview,
+    enableGuestPreview,
+  } = useAuth();
+
+  const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
+  const [authModalMode, setAuthModalMode] = useState<'signin' | 'signup' | 'forgot'>('signin');
+
+  // Synchronize authenticated user profile to local farmer context
+  useEffect(() => {
+    if (currentUser) {
+      if (currentUser.role) {
+        setCurrentRole(currentUser.role);
+      }
+      if (currentUser.fullName) {
+        setIndianFarmerProfile((prev) => ({
+          ...prev,
+          fullName: currentUser.fullName,
+          email: currentUser.email,
+          state: currentUser.state || prev.state,
+          district: currentUser.district || prev.district,
+        }));
+      }
+    }
+  }, [currentUser]);
+
+  const handleLoginSuccess = (user: AuthUser) => {
+    showToast(`Verified: ${user.fullName} (${user.loginId})`);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    showToast('Signed out of Firebase. Please sign in to re-enter.');
+  };
 
   // Sync to local storage
   useEffect(() => {
@@ -214,8 +259,54 @@ export default function App() {
     showToast('CSV export downloaded');
   };
 
+  // Firebase Authentication Loading Guard
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#F3F6EF] flex flex-col items-center justify-center p-4">
+        <div className="w-12 h-12 rounded-2xl bg-[#173F32] flex items-center justify-center text-white shadow-lg animate-pulse mb-4">
+          <Droplets className="w-6 h-6 text-[#A8D5BA]" />
+        </div>
+        <div className="flex items-center gap-2 text-[#173F32] font-bold text-sm">
+          <RefreshCw className="w-4 h-4 animate-spin text-[#173F32]" />
+          <span>Connecting to AeroFlora Firebase Security...</span>
+        </div>
+        <p className="text-xs text-slate-500 mt-1 font-mono">256-bit Cloud Identity Authentication</p>
+      </div>
+    );
+  }
+
+  // Enforce Real Authentication & Email Verification Gate
+  // Protected Dashboard is only accessible after verified login or explicit demo preview
+  if ((!currentUser && !guestPreviewMode) || (currentUser && needsEmailVerification && !guestPreviewMode)) {
+    return (
+      <LoginPage
+        onSuccess={() => {
+          showToast(`Welcome to AeroFlora Systems!`);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+      {/* Top Academic Guest Preview Banner */}
+      {guestPreviewMode && (
+        <div className="bg-[#173F32] text-white px-4 py-2.5 text-xs flex flex-col sm:flex-row items-center justify-between gap-2 border-b border-emerald-800">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0"></span>
+            <span>
+              <strong>Academic Demonstration Mode:</strong> You are exploring the dashboard as a guest. Real Firebase authentication is active.
+            </span>
+          </div>
+          <button
+            onClick={exitGuestPreview}
+            className="px-3 py-1 bg-white hover:bg-emerald-50 text-[#173F32] font-bold rounded-lg transition text-xs cursor-pointer shrink-0 shadow-xs"
+          >
+            Sign In / Register
+          </button>
+        </div>
+      )}
+
       {/* Top Navigation Bar with 13 Modules & Multi-Language Selector */}
       <Header
         activeTab={activeTab}
@@ -226,6 +317,16 @@ export default function App() {
         onOpenReportModal={() => setShowReportModal(true)}
         onOpenGuide={() => setShowGuideModal(true)}
         onOpenAssistant={() => setShowAssistantModal(true)}
+        authUser={currentUser}
+        onOpenAuthModal={(mode = 'signin') => {
+          if (guestPreviewMode) {
+            exitGuestPreview();
+          } else {
+            setAuthModalMode(mode);
+            setShowAuthModal(true);
+          }
+        }}
+        onLogout={handleLogout}
       />
 
       {/* Floating Notification */}
@@ -470,6 +571,14 @@ export default function App() {
           acres: indianFarmerProfile.farms[0]?.totalAcres,
           dailyHarvestLiters: simulation.totalDailyLiters,
         }}
+      />
+
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onLoginSuccess={handleLoginSuccess}
+        initialMode={authModalMode}
+        isMandatoryGate={false}
       />
     </div>
   );
