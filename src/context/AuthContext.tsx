@@ -36,9 +36,6 @@ interface AuthContextType {
   resendEmail: () => Promise<void>;
   checkVerification: () => Promise<boolean>;
   logout: () => Promise<void>;
-  guestPreviewMode: boolean;
-  enableGuestPreview: () => void;
-  exitGuestPreview: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -48,7 +45,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [needsEmailVerification, setNeedsEmailVerification] = useState<boolean>(false);
-  const [guestPreviewMode, setGuestPreviewMode] = useState<boolean>(false);
   const [isSessionUnlocked, setIsSessionUnlocked] = useState<boolean>(false);
   const [hasSecurityPassword, setHasSecurityPassword] = useState<boolean>(true);
 
@@ -121,7 +117,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setCurrentUser(res.user);
     setFirebaseUser(res.fbUser);
     setNeedsEmailVerification(!res.emailVerified);
-    setGuestPreviewMode(false);
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('aeroflora_unlocked_' + res.user.id, 'true');
     }
@@ -138,7 +133,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setCurrentUser(res.user);
     setFirebaseUser(res.fbUser);
     setNeedsEmailVerification(true);
-    setGuestPreviewMode(false);
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('aeroflora_unlocked_' + res.user.id, 'true');
     }
@@ -157,7 +151,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setCurrentUser(res.user);
       setFirebaseUser(res.fbUser);
       setNeedsEmailVerification(false);
-      setGuestPreviewMode(false);
 
       const hasPass = await checkHasSecurityPassword(res.user.id);
       setHasSecurityPassword(hasPass);
@@ -236,15 +229,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setFirebaseUser(null);
     setNeedsEmailVerification(false);
     setIsSessionUnlocked(false);
-    setGuestPreviewMode(false);
-  };
-
-  const enableGuestPreview = () => {
-    setGuestPreviewMode(true);
-  };
-
-  const exitGuestPreview = () => {
-    setGuestPreviewMode(false);
   };
 
   const value: AuthContextType = {
@@ -264,9 +248,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     resendEmail,
     checkVerification,
     logout,
-    guestPreviewMode,
-    enableGuestPreview,
-    exitGuestPreview,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

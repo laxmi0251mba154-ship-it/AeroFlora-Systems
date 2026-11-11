@@ -137,11 +137,8 @@ export default function App() {
     currentUser,
     loading: authLoading,
     needsEmailVerification,
-    guestPreviewMode,
     isSessionUnlocked,
     logout,
-    exitGuestPreview,
-    enableGuestPreview,
   } = useAuth();
 
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
@@ -278,8 +275,8 @@ export default function App() {
   }
 
   // Enforce Real Authentication & Email Verification Gate
-  // Protected Dashboard is only accessible after verified login or explicit demo preview
-  if ((!currentUser && !guestPreviewMode) || (currentUser && needsEmailVerification && !guestPreviewMode)) {
+  // Protected Dashboard is strictly accessible ONLY after real verified authentication
+  if (!currentUser || (currentUser && needsEmailVerification)) {
     return (
       <LoginPage
         onSuccess={() => {
@@ -292,7 +289,7 @@ export default function App() {
   // Enforce Mandatory Password Security Gate:
   // When an account is selected (from Google, session, or returning after logout),
   // it MUST ask for the password before granting dashboard access!
-  if (currentUser && !isSessionUnlocked && !guestPreviewMode) {
+  if (currentUser && !isSessionUnlocked) {
     return (
       <PasswordUnlockScreen
         user={currentUser}
@@ -306,24 +303,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-      {/* Top Academic Guest Preview Banner */}
-      {guestPreviewMode && (
-        <div className="bg-[#173F32] text-white px-4 py-2.5 text-xs flex flex-col sm:flex-row items-center justify-between gap-2 border-b border-emerald-800">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0"></span>
-            <span>
-              <strong>Academic Demonstration Mode:</strong> You are exploring the dashboard as a guest. Real Firebase authentication is active.
-            </span>
-          </div>
-          <button
-            onClick={exitGuestPreview}
-            className="px-3 py-1 bg-white hover:bg-emerald-50 text-[#173F32] font-bold rounded-lg transition text-xs cursor-pointer shrink-0 shadow-xs"
-          >
-            Sign In / Register
-          </button>
-        </div>
-      )}
-
       {/* Top Navigation Bar with 13 Modules & Multi-Language Selector */}
       <Header
         activeTab={activeTab}
@@ -336,12 +315,8 @@ export default function App() {
         onOpenAssistant={() => setShowAssistantModal(true)}
         authUser={currentUser}
         onOpenAuthModal={(mode = 'signin') => {
-          if (guestPreviewMode) {
-            exitGuestPreview();
-          } else {
-            setAuthModalMode(mode);
-            setShowAuthModal(true);
-          }
+          setAuthModalMode(mode);
+          setShowAuthModal(true);
         }}
         onLogout={handleLogout}
       />

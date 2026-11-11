@@ -49,7 +49,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     resendEmail,
     checkVerification,
     logout,
-    enableGuestPreview,
   } = useAuth();
 
   const [mode, setMode] = useState<'signin' | 'signup' | 'forgot' | 'verify'>(
@@ -60,7 +59,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   const [signInEmail, setSignInEmail] = useState('');
   const [signInPassword, setSignInPassword] = useState('');
   const [showSignInPassword, setShowSignInPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
 
   // Sign Up State
   const [signUpName, setSignUpName] = useState('');
@@ -79,8 +78,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
-  const [showGoogleModal, setShowGoogleModal] = useState(false);
-  const [unregisteredCredentials, setUnregisteredCredentials] = useState<{ email: string; password: string } | null>(null);
 
   // Sync mode if needs verification
   useEffect(() => {
@@ -148,7 +145,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     setIsLoading(true);
     try {
       const result = await login(emailToUse, signInPassword, rememberMe);
-      setUnregisteredCredentials(null);
       if (!result.emailVerified) {
         setMode('verify');
         setSuccessMessage('Sign in successful. Please verify your email address to access your agricultural dashboard.');
@@ -156,32 +152,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         setSuccessMessage(`Welcome back, ${result.user.fullName}!`);
         onSuccess?.();
       }
-    } catch (err: any) {
-      if (err?.code === 'auth/invalid-credential' || err?.code === 'auth/user-not-found') {
-        setUnregisteredCredentials({ email: emailToUse, password: signInPassword });
-      }
-      setErrorMessage(parseAuthErrorMessage(err));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Quick Register with Entered Password
-  const handleQuickRegister = async () => {
-    if (!unregisteredCredentials) return;
-    setIsLoading(true);
-    setErrorMessage(null);
-    setSuccessMessage(null);
-
-    const { email, password } = unregisteredCredentials;
-    const local = email.split('@')[0] || '';
-    const cleanName = local.charAt(0).toUpperCase() + local.slice(1);
-
-    try {
-      await register(cleanName, email, password, 'farmer');
-      setUnregisteredCredentials(null);
-      setMode('verify');
-      setSuccessMessage('Account registered successfully! A verification link has been sent to your email.');
     } catch (err: any) {
       setErrorMessage(parseAuthErrorMessage(err));
     } finally {
@@ -227,27 +197,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     }
   };
 
-  // Handle Google Sign-In button click
+  // Handle Google Sign-In directly
   const handleGoogleSignInClick = async () => {
-    // If user already typed their email & password (as seen in user screenshot), use password login directly!
-    if (signInEmail.trim() && signInPassword) {
-      await handleSignInSubmit();
-      return;
-    }
-    // If fields are empty, prompt user to choose between Password login (no phone prompt) or Google SSO
-    setShowGoogleModal(true);
-  };
-
-  // Execute actual Google OAuth popup
-  const executeGooglePopup = async () => {
-    setShowGoogleModal(false);
     setErrorMessage(null);
     setSuccessMessage(null);
     setIsLoading(true);
 
     try {
       const user = await signInWithGoogle(rememberMe);
-      setSuccessMessage(`Signed in as ${user.fullName} via Google.`);
+      setSuccessMessage(`Signed in as ${user.fullName} via Google. Verifying security credentials...`);
       onSuccess?.();
     } catch (err: any) {
       if (
@@ -353,12 +311,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             <span className="block text-[10px] text-slate-500 font-medium">Farm Water Intelligence</span>
           </div>
         </div>
-        <button
-          onClick={enableGuestPreview}
-          className="text-xs text-[#173F32] font-semibold hover:underline cursor-pointer"
-        >
-          Guest Preview →
-        </button>
+        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#173F32] bg-[#F3F6EF] px-2.5 py-1 rounded-md border border-[#173F32]/20">
+          <ShieldCheck className="w-3.5 h-3.5 text-[#173F32]" />
+          <span>Secure Sign In</span>
+        </div>
       </header>
 
       {/* Main Split-Screen Container */}
@@ -478,6 +434,40 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               </div>
             )}
 
+            {/* Top Navigation Tabs: Sign In / Create Account */}
+            {(mode === 'signin' || mode === 'signup') && (
+              <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode('signin');
+                    setErrorMessage(null);
+                  }}
+                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                    mode === 'signin'
+                      ? 'bg-white text-[#173F32] shadow-xs'
+                      : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  Sign In
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode('signup');
+                    setErrorMessage(null);
+                  }}
+                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                    mode === 'signup'
+                      ? 'bg-white text-[#173F32] shadow-xs'
+                      : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  Create Account
+                </button>
+              </div>
+            )}
+
             {/* ================= MODE 1: SIGN IN ================= */}
             {mode === 'signin' && (
               <div className="space-y-5">
@@ -522,42 +512,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 {/* Divider with "OR" */}
                 <div className="flex items-center gap-3">
                   <div className="h-px bg-slate-200 flex-1"></div>
-                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">OR SIGN IN WITH PASSWORD (NO PHONE PROMPT)</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">or sign in with password</span>
                   <div className="h-px bg-slate-200 flex-1"></div>
                 </div>
 
-                {/* One-Click Quick Registration if credentials are not yet registered */}
-                {unregisteredCredentials && (
-                  <div className="p-3.5 bg-emerald-50 border border-emerald-300 rounded-xl space-y-2 animate-in fade-in shadow-xs">
-                    <div className="flex items-center gap-2 text-emerald-900 font-bold text-xs">
-                      <Sparkles className="w-4 h-4 text-emerald-700" />
-                      <span>Create Account for {unregisteredCredentials.email}</span>
-                    </div>
-                    <p className="text-[11px] text-emerald-800 leading-relaxed">
-                      No account was found with this email yet. Would you like to register this password and sign in directly?
-                    </p>
-                    <button
-                      type="button"
-                      onClick={handleQuickRegister}
-                      disabled={isLoading}
-                      className="w-full py-2.5 bg-[#173F32] hover:bg-[#1f5241] text-white text-xs font-bold rounded-xl transition shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                    >
-                      {isLoading ? (
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
-                      ) : (
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#A8D5BA]" />
-                      )}
-                      <span>Register This Password & Sign In</span>
-                    </button>
-                  </div>
-                )}
-
                 {/* Email and Password Form */}
                 <form onSubmit={handleSignInSubmit} className="space-y-4" autoComplete="off">
-                  <div className="bg-[#F3F6EF] border border-[#173F32]/15 rounded-lg px-3 py-2 text-[11px] text-[#173F32] flex items-center gap-2">
-                    <Lock className="w-3.5 h-3.5 shrink-0 text-[#173F32]" />
-                    <span>Sign in with your email & password without any phone notification prompt.</span>
-                  </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1.5">
                       Email Address <span className="text-[#173F32]">*</span>
@@ -895,16 +855,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                       setMode('signin');
                       setErrorMessage(null);
                     }}
-                    className="text-slate-500 hover:text-slate-800 cursor-pointer font-medium"
+                    className="text-slate-500 hover:text-slate-800 cursor-pointer font-medium text-xs mx-auto"
                   >
                     ← Sign In with Different Account
-                  </button>
-                  <button
-                    type="button"
-                    onClick={enableGuestPreview}
-                    className="text-[#173F32] font-bold hover:underline cursor-pointer"
-                  >
-                    Preview Dashboard →
                   </button>
                 </div>
               </div>
@@ -997,21 +950,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               </div>
             )}
 
-            {/* Subtle Guest / Academic Demonstration Link */}
-            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-              <span className="flex items-center gap-1.5">
+            {/* Professional Security & Trust Footer */}
+            <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+              <span className="flex items-center gap-1.5 font-medium">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>Firebase Authentication 10.x</span>
+                <span>Real Authentication & Encryption Active</span>
               </span>
-              <button
-                type="button"
-                onClick={enableGuestPreview}
-                className="text-[#173F32] font-semibold hover:underline cursor-pointer flex items-center gap-1"
-                title="Explore the dashboard in guest preview mode"
-              >
-                <span>Academic Demo / Guest</span>
-                <ChevronRight className="w-3 h-3" />
-              </button>
+              <span className="text-slate-400 font-mono text-[10px]">
+                SHA-256 · TLS 1.3
+              </span>
             </div>
           </div>
         </section>
@@ -1026,81 +973,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           </span>
         </div>
       </footer>
-
-      {/* Choice Modal when user clicks "Continue with Google" without typing credentials */}
-      {showGoogleModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-slate-200 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-[#173F32] flex items-center justify-center text-white">
-                  <ShieldCheck className="w-4 h-4 text-[#A8D5BA]" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-sm text-[#173F32]">Authentication Method</h3>
-                  <p className="text-[10px] text-slate-500">Choose how you want to log in</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowGoogleModal(false)}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <p className="text-xs text-slate-600 leading-relaxed">
-              You clicked <strong>Continue with Google</strong>. Which login experience do you prefer?
-            </p>
-
-            <div className="space-y-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowGoogleModal(false);
-                  const input = document.querySelector('input[type="email"]') as HTMLInputElement;
-                  input?.focus();
-                }}
-                className="w-full p-3.5 rounded-xl border-2 border-[#173F32] bg-[#F3F6EF] hover:bg-[#e8ece3] text-left transition cursor-pointer group shadow-xs"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-xs text-[#173F32] flex items-center gap-2">
-                    <Lock className="w-4 h-4 text-[#173F32]" />
-                    Sign in with Password (Recommended)
-                  </span>
-                  <span className="text-[10px] bg-[#173F32] text-white px-2 py-0.5 rounded-full font-bold">
-                    No Phone Prompt
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-600 mt-1.5 leading-relaxed">
-                  Type your email & password directly on this screen. Never asks for phone verification and requires your password every time.
-                </p>
-              </button>
-
-              <button
-                type="button"
-                onClick={executeGooglePopup}
-                className="w-full p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-left transition cursor-pointer"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-xs text-slate-800 flex items-center gap-2">
-                    <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                    </svg>
-                    Google Single Sign-On (SSO)
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
-                  Opens Google popup. Google will verify your browser session or send a 2FA notification to your phone.
-                </p>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
