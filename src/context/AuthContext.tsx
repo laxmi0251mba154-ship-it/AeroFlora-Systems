@@ -12,6 +12,9 @@ import {
   resendVerification as fbResendVerification,
   refreshEmailVerification as fbRefreshEmailVerification,
   logoutFirebase as fbLogout,
+  verifySecurityPassword,
+  saveSecurityPassword,
+  checkHasSecurityPassword,
 } from '../utils/firebaseAuthService';
 import { AuthUser } from '../types/auth';
 import { UserRole } from '../types/aeroflora';
@@ -22,6 +25,10 @@ interface AuthContextType {
   loading: boolean;
   isEmailVerified: boolean;
   needsEmailVerification: boolean;
+  isSessionUnlocked: boolean;
+  hasSecurityPassword: boolean;
+  unlockSessionWithPassword: (password: string) => Promise<boolean>;
+  setSessionPassword: (password: string) => Promise<boolean>;
   login: (email: string, pass: string, rememberMe?: boolean) => Promise<{ emailVerified: boolean; user: AuthUser }>;
   register: (fullName: string, email: string, pass: string, role?: UserRole) => Promise<{ user: AuthUser }>;
   signInWithGoogle: (rememberMe?: boolean) => Promise<AuthUser>;
@@ -42,15 +49,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState<boolean>(true);
   const [needsEmailVerification, setNeedsEmailVerification] = useState<boolean>(false);
   const [guestPreviewMode, setGuestPreviewMode] = useState<boolean>(false);
+  const [isSessionUnlocked, setIsSessionUnlocked] = useState<boolean>(false);
+  const [hasSecurityPassword, setHasSecurityPassword] = useState<boolean>(true);
 
   // Subscribe to Firebase Auth state & handle redirect return
   useEffect(() => {
     // 1. Check for any pending redirect result first
-    checkRedirectAuthResult().then((res) => {
+    checkRedirectAuthResult().then(async (res) => {
       if (res) {
         setCurrentUser(res.user);
         setFirebaseUser(res.fbUser);
         setNeedsEmailVerification(!res.user.emailVerified);
+        const hasPass = await checkHasSecurityPassword(res.user.id);
+        setHasSecurityPassword(hasPass);
+        const isUnlocked = typeof window !== 'undefined' && sessionStorage.getItem('aeroflora_unlocked_' + res.user.id) === 'true';
+        setIsSessionUnlocked(isUnlocked);
       }
     });
 
@@ -59,12 +72,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setFirebaseUser(fbUser);
 
       if (fbUser) {
-        // Fetch Firestore profile safely if available
-        let profileData: Partial<AuthUser> | null = null;
+        let profileData: Partial<AuthUser> & { securityPasswordHash?: string } | null = null;
         try {
           const userDoc = await getDoc(doc(db, 'users', fbUser.uid));
           if (userDoc.exists()) {
-            profileData = userDoc.data() as Partial<AuthUser>;
+            profileData = userDoc.data() as any;
           }
         } catch (err) {
           console.warn('Error reading user profile on state change:', err);
@@ -72,6 +84,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         const mapped = mapFirebaseUserToAuthUser(fbUser, profileData);
         setCurrentUser(mapped);
+
+        // Check if user has configured a security password
+        const hasPass = Boolean(profileData?.securityPasswordHash);
+        setHasSecurityPassword(hasPass);
+
+        // Check if this user was already unlocked in this browser session
+        const isUnlocked = typeof window !== 'undefined' && sessionStorage.getItem('aeroflora_unlocked_' + fbUser.uid) === 'true';
+        setIsSessionUnlocked(isUnlocked);
 
         // Google accounts are verified by definition; email accounts check emailVerified
         const isGoogle = fbUser.providerData.some((p) => p.providerId === 'google.com');
@@ -83,6 +103,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       } else {
         setCurrentUser(null);
         setNeedsEmailVerification(false);
+        setIsSessionUnlocked(false);
       }
 
       setLoading(false);
@@ -93,9 +114,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   /**
    * Real Email/Password login.
-   * Notice: We do NOT set global `loading = true` here because that causes
-   * App.tsx to display a full-screen loading screen and unmount LoginPage,
-   * dropping form inputs and error messages!
+   * Auto-unlocks session because password was explicitly verified during login.
    */
   const login = async (email: string, pass: string, rememberMe: boolean = true) => {
     const res = await fbLoginWithEmail(email, pass, rememberMe);
@@ -103,6 +122,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setFirebaseUser(res.fbUser);
     setNeedsEmailVerification(!res.emailVerified);
     setGuestPreviewMode(false);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('aeroflora_unlocked_' + res.user.id, 'true');
+    }
+    setIsSessionUnlocked(true);
+    setHasSecurityPassword(true);
     return { emailVerified: res.emailVerified, user: res.user };
   };
 
@@ -115,12 +139,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setFirebaseUser(res.fbUser);
     setNeedsEmailVerification(true);
     setGuestPreviewMode(false);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('aeroflora_unlocked_' + res.user.id, 'true');
+    }
+    setIsSessionUnlocked(true);
+    setHasSecurityPassword(true);
     return { user: res.user };
   };
 
   /**
    * Real Google OAuth Sign-in.
-   * Enforces prompt: 'select_account' and sets session or local persistence based on Remember Me.
+   * Checks if user has a security password, requiring password entry before opening dashboard.
    */
   const signInWithGoogle = async (rememberMe: boolean = false) => {
     const res = await fbLoginWithGoogle(rememberMe);
@@ -129,9 +158,46 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setFirebaseUser(res.fbUser);
       setNeedsEmailVerification(false);
       setGuestPreviewMode(false);
+
+      const hasPass = await checkHasSecurityPassword(res.user.id);
+      setHasSecurityPassword(hasPass);
+
+      const isAlreadyUnlocked = typeof window !== 'undefined' && sessionStorage.getItem('aeroflora_unlocked_' + res.user.id) === 'true';
+      setIsSessionUnlocked(isAlreadyUnlocked);
+
       return res.user;
     }
     throw new Error('Google authentication was cancelled or returned empty.');
+  };
+
+  /**
+   * Unlock current session by verifying password
+   */
+  const unlockSessionWithPassword = async (pass: string): Promise<boolean> => {
+    if (!currentUser) return false;
+    const isValid = await verifySecurityPassword(currentUser.id, pass);
+    if (isValid) {
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('aeroflora_unlocked_' + currentUser.id, 'true');
+      }
+      setIsSessionUnlocked(true);
+      return true;
+    }
+    return false;
+  };
+
+  /**
+   * Configure new security password for current user
+   */
+  const setSessionPassword = async (pass: string): Promise<boolean> => {
+    if (!currentUser) return false;
+    await saveSecurityPassword(currentUser.id, pass);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('aeroflora_unlocked_' + currentUser.id, 'true');
+    }
+    setHasSecurityPassword(true);
+    setIsSessionUnlocked(true);
+    return true;
   };
 
   const resetPassword = async (email: string) => {
@@ -153,11 +219,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return verified;
   };
 
+  /**
+   * Comprehensive Logout: Clears Firebase Auth, session storage, and lock state.
+   * Guarantees next login MUST enter a password.
+   */
   const logout = async () => {
     await fbLogout();
+    if (typeof window !== 'undefined') {
+      sessionStorage.clear();
+      // Remove any leftover unlock keys
+      Object.keys(localStorage).forEach((k) => {
+        if (k.startsWith('aeroflora_unlocked_')) localStorage.removeItem(k);
+      });
+    }
     setCurrentUser(null);
     setFirebaseUser(null);
     setNeedsEmailVerification(false);
+    setIsSessionUnlocked(false);
     setGuestPreviewMode(false);
   };
 
@@ -175,6 +253,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     loading,
     isEmailVerified: Boolean(firebaseUser?.emailVerified),
     needsEmailVerification,
+    isSessionUnlocked,
+    hasSecurityPassword,
+    unlockSessionWithPassword,
+    setSessionPassword,
     login,
     register,
     signInWithGoogle,

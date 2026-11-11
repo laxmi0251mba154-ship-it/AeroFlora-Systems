@@ -38,7 +38,7 @@ export const db = firebaseConfig.firestoreDatabaseId
   ? getFirestore(app, firebaseConfig.firestoreDatabaseId)
   : getFirestore(app);
 
-// Creates a fresh GoogleAuthProvider with account selection enforced
+// Creates a fresh GoogleAuthProvider with standard account selection
 export function createGoogleProvider(loginHint?: string) {
   const provider = new GoogleAuthProvider();
   const customParams: Record<string, string> = {

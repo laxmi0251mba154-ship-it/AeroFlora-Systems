@@ -97,7 +97,7 @@ export function parseAuthErrorMessage(error: any): string {
       return 'Email/Password sign-in is currently disabled in your Firebase console. Go to Firebase Console > Authentication > Sign-in method, click Email/Password, and enable it. (You can also sign in with Continue with Google).';
     case 'auth/invalid-credential':
     case 'auth/wrong-password':
-      return 'Incorrect email or password. Please verify your credentials or use Forgot Password.';
+      return 'Incorrect email or password. If you have not registered your account yet, please click "Create an Account" below to set your password.';
     case 'auth/user-not-found':
       return 'No registered account found with this email address. Please create an account.';
     case 'auth/email-already-in-use':
@@ -247,8 +247,9 @@ export async function registerWithEmail(
   };
 
   await safeFirestoreOperation(async () => {
+    const hash = await hashSecurityPassword(password);
     const userDocRef = doc(db, 'users', fbUser.uid);
-    await setDoc(userDocRef, initialProfile, { merge: true });
+    await setDoc(userDocRef, { ...initialProfile, securityPasswordHash: hash }, { merge: true });
   }, null);
 
   const authUser = mapFirebaseUserToAuthUser(fbUser, initialProfile);
@@ -283,14 +284,18 @@ export async function loginWithEmail(
   const profileData = await safeFirestoreOperation<Partial<AuthUser> | null>(async () => {
     const userDocRef = doc(db, 'users', fbUser.uid);
     const userDoc = await getDoc(userDocRef);
+    const hash = await hashSecurityPassword(password);
     if (userDoc.exists()) {
       const data = userDoc.data() as Partial<AuthUser>;
-      // Update last login timestamp in background
+      // Update last login timestamp and security password in background
       updateDoc(userDocRef, {
         lastLoginAt: new Date().toISOString(),
         emailVerified: fbUser.emailVerified,
+        securityPasswordHash: hash,
       }).catch((e) => console.warn('Background login stamp notice:', e));
       return data;
+    } else {
+      await setDoc(userDocRef, { securityPasswordHash: hash }, { merge: true });
     }
     return null;
   }, null);
@@ -447,9 +452,67 @@ export async function logoutFirebase(): Promise<void> {
     console.warn('Logout persistence revert notice:', err);
   }
 
-  // Clear application session storage
+  // Clear application session storage and unlock keys
   if (typeof window !== 'undefined') {
     sessionStorage.clear();
   }
+}
+
+/**
+ * Generates SHA-256 hash for strict password validation
+ */
+export async function hashSecurityPassword(password: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password + '_aeroflora_salt_2026');
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+/**
+ * Save user's security password hash in Firestore users/{uid}
+ */
+export async function saveSecurityPassword(uid: string, password: string): Promise<void> {
+  const hash = await hashSecurityPassword(password);
+  await safeFirestoreOperation(async () => {
+    const userDocRef = doc(db, 'users', uid);
+    await setDoc(userDocRef, { securityPasswordHash: hash }, { merge: true });
+  }, null);
+}
+
+/**
+ * Check if the user has an existing security password configured
+ */
+export async function checkHasSecurityPassword(uid: string): Promise<boolean> {
+  return await safeFirestoreOperation(async () => {
+    const userDocRef = doc(db, 'users', uid);
+    const snap = await getDoc(userDocRef);
+    if (snap.exists()) {
+      const data = snap.data();
+      return Boolean(data.securityPasswordHash);
+    }
+    return false;
+  }, false);
+}
+
+/**
+ * Verify user's entered password against their stored security password hash
+ */
+export async function verifySecurityPassword(uid: string, enteredPassword: string): Promise<boolean> {
+  const enteredHash = await hashSecurityPassword(enteredPassword);
+  return await safeFirestoreOperation(async () => {
+    const userDocRef = doc(db, 'users', uid);
+    const snap = await getDoc(userDocRef);
+    if (snap.exists()) {
+      const data = snap.data();
+      if (!data.securityPasswordHash) {
+        // If not set yet, set it now and accept
+        await setDoc(userDocRef, { securityPasswordHash: enteredHash }, { merge: true });
+        return true;
+      }
+      return data.securityPasswordHash === enteredHash;
+    }
+    return false;
+  }, false);
 }
 

@@ -27,6 +27,7 @@ import { QuickGuideModal } from './components/QuickGuideModal';
 import { KisanJalSaathiModal } from './components/KisanJalSaathiModal';
 import { AuthModal } from './components/AuthModal';
 import { LoginPage } from './components/LoginPage';
+import { PasswordUnlockScreen } from './components/PasswordUnlockScreen';
 import { useAuth } from './context/AuthContext';
 import { AuthUser } from './types/auth';
 import { runSimulation } from './utils/thermodynamics';
@@ -137,6 +138,7 @@ export default function App() {
     loading: authLoading,
     needsEmailVerification,
     guestPreviewMode,
+    isSessionUnlocked,
     logout,
     exitGuestPreview,
     enableGuestPreview,
@@ -283,6 +285,21 @@ export default function App() {
         onSuccess={() => {
           showToast(`Welcome to AeroFlora Systems!`);
         }}
+      />
+    );
+  }
+
+  // Enforce Mandatory Password Security Gate:
+  // When an account is selected (from Google, session, or returning after logout),
+  // it MUST ask for the password before granting dashboard access!
+  if (currentUser && !isSessionUnlocked && !guestPreviewMode) {
+    return (
+      <PasswordUnlockScreen
+        user={currentUser}
+        onUnlock={() => {
+          showToast(`Welcome back, ${currentUser.fullName}!`);
+        }}
+        onCancel={handleLogout}
       />
     );
   }
