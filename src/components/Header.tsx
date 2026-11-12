@@ -84,7 +84,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-emerald-950 text-white border-b border-emerald-900 shadow-md">
+    <header className="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md text-white border-b border-slate-800 shadow-md">
       {/* Upper Brand & Quick Utility Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-3">
         {/* Brand Wordmark */}
@@ -93,21 +93,20 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => onSelectTab('overview')}
             className="flex items-center gap-2.5 text-left group cursor-pointer"
           >
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-300">
-              <Droplets className="w-5 h-5 text-emerald-400" />
+            <div className="w-8 h-8 rounded-lg bg-sky-500/20 border border-sky-400/40 flex items-center justify-center text-sky-400 shadow-xs">
+              <Droplets className="w-4 h-4 text-sky-400" />
             </div>
             <div>
-              <span className="text-base font-extrabold tracking-tight text-white group-hover:text-emerald-300 transition-colors">
+              <span className="text-base font-extrabold tracking-tight text-white group-hover:text-sky-300 transition-colors">
                 AeroFlora Systems
               </span>
-              <span className="hidden sm:block text-[10px] text-emerald-300/80 -mt-0.5 font-medium">
+              <span className="hidden sm:block text-[10px] text-slate-400 -mt-0.5 font-medium">
                 Farm Water Intelligence · Designed for India
               </span>
             </div>
           </button>
 
-          <span className="hidden xl:inline-flex items-center gap-1.5 text-[10px] font-mono text-emerald-300 bg-emerald-900/60 px-2 py-0.5 rounded border border-emerald-700/50">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span className="hidden xl:inline-flex items-center gap-1.5 text-[10px] font-mono text-sky-300 bg-sky-950/60 px-2 py-0.5 rounded border border-sky-800/60">
             <span>PM-KUSUM Ready</span>
           </span>
         </div>
@@ -117,7 +116,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* AI Assistant Quick Trigger */}
           <button
             onClick={onOpenAssistant}
-            className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-slate-950 text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
+            className="px-2.5 py-1.5 bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
           >
             <Sparkles className="w-3.5 h-3.5 text-slate-950" />
             <span className="hidden md:inline">Kisan Jal Saathi (AI)</span>
@@ -127,9 +126,9 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Guide Playbook */}
           <button
             onClick={onOpenGuide}
-            className="hidden sm:flex px-2.5 py-1.5 bg-emerald-900/70 hover:bg-emerald-800 text-emerald-100 text-xs font-medium rounded-lg border border-emerald-700/50 transition-colors items-center gap-1.5 cursor-pointer"
+            className="hidden sm:flex px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium rounded-lg border border-slate-700 transition-colors items-center gap-1.5 cursor-pointer"
           >
-            <HelpCircle className="w-3.5 h-3.5 text-emerald-300" />
+            <HelpCircle className="w-3.5 h-3.5 text-sky-400" />
             <span>Guide</span>
           </button>
 
@@ -138,7 +137,7 @@ export const Header: React.FC<HeaderProps> = ({
             <select
               value={currentLanguage}
               onChange={(e) => onChangeLanguage(e.target.value as SupportedLanguage)}
-              className="bg-emerald-900/80 text-emerald-100 text-xs font-semibold px-2 py-1.5 rounded-lg border border-emerald-700/60 focus:outline-none focus:ring-1 focus:ring-emerald-400 cursor-pointer"
+              className="bg-slate-800/90 text-slate-200 text-xs font-semibold px-2 py-1.5 rounded-lg border border-slate-700 focus:outline-none focus:ring-1 focus:ring-sky-400 cursor-pointer"
               aria-label="Select Language"
             >
               {SUPPORTED_LANGUAGES.map((l) => (
@@ -154,10 +153,10 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="relative">
               <button
                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                className="flex items-center gap-2 px-2.5 py-1 bg-emerald-900/90 hover:bg-emerald-800 text-white rounded-lg border border-emerald-700/60 text-xs transition cursor-pointer"
+                className="flex items-center gap-2 px-2.5 py-1 bg-slate-800/90 hover:bg-slate-700 text-white rounded-lg border border-slate-700 text-xs transition cursor-pointer"
               >
                 <div className="relative">
-                  <div className="w-6 h-6 rounded-full bg-emerald-600 text-slate-950 font-black text-[11px] flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-sky-400 to-blue-600 text-slate-950 font-black text-[11px] flex items-center justify-center shadow-xs">
                     {getInitials(authUser.fullName)}
                   </div>
                   {authUser.authProvider === 'google' && (
@@ -173,31 +172,31 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
                 <div className="hidden sm:flex flex-col text-left leading-tight">
                   <div className="flex items-center gap-1.5">
-                    <span className="font-bold text-[11px] text-emerald-200 max-w-[110px] truncate">
+                    <span className="font-bold text-[11px] text-slate-200 max-w-[110px] truncate">
                       {authUser.fullName}
                     </span>
-                    <span className="text-[9px] bg-emerald-950 text-emerald-400 font-mono px-1 py-0.2 rounded border border-emerald-800/80">
+                    <span className="text-[9px] bg-slate-900 text-sky-400 font-mono px-1 py-0.2 rounded border border-slate-700">
                       ID: {authUser.loginId || '0251MBA154'}
                     </span>
                   </div>
-                  <span className="text-[9px] text-emerald-400 font-mono max-w-[150px] truncate">
+                  <span className="text-[9px] text-slate-400 font-mono max-w-[150px] truncate">
                     {authUser.email}
                   </span>
                 </div>
-                <ChevronDown className="w-3.5 h-3.5 text-emerald-400" />
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
               </button>
 
               {/* User Dropdown Menu */}
               {userDropdownOpen && (
                 <div
-                  className="absolute right-0 mt-2 w-72 bg-slate-900 border border-emerald-500/30 rounded-xl shadow-2xl p-3 text-xs space-y-2 z-50 animate-in fade-in slide-in-from-top-2"
+                  className="absolute right-0 mt-2 w-72 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl p-3 text-xs space-y-2 z-50 animate-in fade-in slide-in-from-top-2"
                   onMouseLeave={() => setUserDropdownOpen(false)}
                 >
                   <div className="border-b border-slate-800 pb-2">
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-white text-sm">{authUser.fullName}</span>
                       {authUser.authProvider === 'google' ? (
-                        <span className="text-[10px] bg-blue-950 text-blue-300 px-1.5 py-0.5 rounded border border-blue-800 flex items-center gap-1">
+                        <span className="text-[10px] bg-sky-950/80 text-sky-300 px-1.5 py-0.5 rounded border border-sky-800 flex items-center gap-1">
                           <svg className="w-2.5 h-2.5" viewBox="0 0 24 24">
                             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -207,17 +206,17 @@ export const Header: React.FC<HeaderProps> = ({
                           Google
                         </span>
                       ) : (
-                        <span className="text-[10px] bg-emerald-950 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-800">
+                        <span className="text-[10px] bg-slate-800 text-sky-400 px-1.5 py-0.5 rounded border border-slate-700">
                           ID Verified
                         </span>
                       )}
                     </div>
-                    <div className="mt-1 flex items-center justify-between text-[11px] bg-slate-950 p-1.5 rounded-lg border border-slate-800 font-mono text-emerald-300">
+                    <div className="mt-1 flex items-center justify-between text-[11px] bg-slate-950 p-1.5 rounded-lg border border-slate-800 font-mono text-sky-300">
                       <span className="text-slate-400">Login ID:</span>
                       <span className="font-bold">{authUser.loginId || '0251MBA154'}</span>
                     </div>
                     <p className="text-slate-400 text-[11px] truncate mt-1">{authUser.email}</p>
-                    <p className="text-emerald-400/90 text-[10px] mt-0.5 flex items-center gap-1">
+                    <p className="text-sky-400/90 text-[10px] mt-0.5 flex items-center gap-1">
                       <ShieldCheck className="w-3 h-3" />
                       Role: <span className="font-bold capitalize">{authUser.role.replace('_', ' ')}</span>
                     </p>
@@ -234,7 +233,7 @@ export const Header: React.FC<HeaderProps> = ({
                       }}
                       className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-slate-800 text-slate-200 hover:text-white flex items-center gap-2 cursor-pointer transition"
                     >
-                      <User className="w-3.5 h-3.5 text-emerald-400" />
+                      <User className="w-3.5 h-3.5 text-sky-400" />
                       <span>My Farm Details</span>
                     </button>
                     <button
@@ -244,7 +243,7 @@ export const Header: React.FC<HeaderProps> = ({
                       }}
                       className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-slate-800 text-slate-200 hover:text-white flex items-center gap-2 cursor-pointer transition"
                     >
-                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                      <ShieldCheck className="w-3.5 h-3.5 text-sky-400" />
                       <span>Security & Roles</span>
                     </button>
                   </div>
@@ -267,7 +266,7 @@ export const Header: React.FC<HeaderProps> = ({
           ) : (
             <button
               onClick={() => onOpenAuthModal?.('signin')}
-              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-slate-950 text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
+              className="px-3 py-1.5 bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
             >
               <User className="w-3.5 h-3.5" />
               <span>Login / ID</span>
@@ -277,7 +276,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Mobile Menu Toggle Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-1.5 text-emerald-200 hover:text-white rounded-lg hover:bg-emerald-900 transition-colors cursor-pointer"
+            className="lg:hidden p-1.5 text-slate-300 hover:text-white rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
             aria-label="Toggle Navigation Menu"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -286,7 +285,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Horizontal Scrolling Tab Bar for Desktop */}
-      <div className="hidden lg:block bg-emerald-900/60 border-t border-emerald-800/60 overflow-x-auto scrollbar-none">
+      <div className="hidden lg:block bg-slate-950/90 border-t border-slate-800/80 overflow-x-auto scrollbar-none">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-1 py-1.5 text-xs font-semibold">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -298,11 +297,11 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={() => onSelectTab(item.key)}
                 className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
                   isActive
-                    ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm'
-                    : 'text-emerald-200/90 hover:text-white hover:bg-emerald-800/60'
+                    ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/70'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-slate-950' : 'text-emerald-400'}`} />
+                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-slate-950' : 'text-sky-400'}`} />
                 <span>{item.label}</span>
               </button>
             );
@@ -312,23 +311,23 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Mobile Drawer Overlay */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-emerald-950 border-t border-emerald-800 p-4 space-y-3 animate-in slide-in-from-top-4">
+        <div className="lg:hidden bg-slate-950 border-t border-slate-800 p-4 space-y-3 animate-in slide-in-from-top-4">
           {/* Mobile Auth Bar */}
-          <div className="p-3 bg-emerald-900/60 rounded-xl border border-emerald-700/50 flex items-center justify-between">
+          <div className="p-3 bg-slate-900 rounded-xl border border-slate-800 flex items-center justify-between">
             {authUser ? (
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-emerald-500 text-slate-950 font-black text-xs flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-sky-400 to-blue-600 text-slate-950 font-black text-xs flex items-center justify-center">
                   {getInitials(authUser.fullName)}
                 </div>
                 <div>
                   <div className="font-bold text-white text-xs">{authUser.fullName}</div>
-                  <div className="text-[10px] text-emerald-300 font-mono truncate max-w-[150px]">{authUser.email}</div>
+                  <div className="text-[10px] text-slate-400 font-mono truncate max-w-[150px]">{authUser.email}</div>
                 </div>
               </div>
             ) : (
-              <div className="text-xs text-emerald-200">
-                <span className="font-semibold text-white">Guest Mode</span>
-                <p className="text-[10px] text-emerald-300/80">Sign in with email to save your farm data</p>
+              <div className="text-xs text-slate-400">
+                <span className="font-semibold text-white">Guest Session</span>
+                <p className="text-[10px] text-slate-500">Sign in to sync farm data</p>
               </div>
             )}
 
@@ -348,14 +347,15 @@ export const Header: React.FC<HeaderProps> = ({
                   setMobileMenuOpen(false);
                   onOpenAuthModal?.('signin');
                 }}
-                className="px-3 py-1.5 text-xs font-bold text-slate-950 bg-emerald-400 hover:bg-emerald-300 rounded-lg shadow transition cursor-pointer"
+                className="px-3 py-1.5 bg-sky-500 text-slate-950 text-xs font-bold rounded-lg hover:bg-sky-400 cursor-pointer"
               >
                 Sign In
               </button>
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
+          {/* Navigation Links in Mobile Drawer */}
+          <div className="grid grid-cols-2 gap-1.5 pt-2">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.key;
@@ -367,13 +367,13 @@ export const Header: React.FC<HeaderProps> = ({
                     onSelectTab(item.key);
                     setMobileMenuOpen(false);
                   }}
-                  className={`p-2.5 rounded-lg text-left text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors ${
+                  className={`px-3 py-2.5 rounded-lg text-left text-xs font-medium flex items-center gap-2 transition cursor-pointer ${
                     isActive
-                      ? 'bg-emerald-500 text-slate-950 font-bold'
-                      : 'bg-emerald-900/50 text-emerald-100 hover:bg-emerald-800'
+                      ? 'bg-sky-500 text-slate-950 font-bold'
+                      : 'bg-slate-900/80 text-slate-300 hover:bg-slate-800 hover:text-white'
                   }`}
                 >
-                  <Icon className="w-4 h-4 shrink-0" />
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-slate-950' : 'text-sky-400'}`} />
                   <span className="truncate">{item.label}</span>
                 </button>
               );

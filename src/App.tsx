@@ -261,15 +261,15 @@ export default function App() {
   // Firebase Authentication Loading Guard
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-[#F3F6EF] flex flex-col items-center justify-center p-4">
-        <div className="w-12 h-12 rounded-2xl bg-[#173F32] flex items-center justify-center text-white shadow-lg animate-pulse mb-4">
-          <Droplets className="w-6 h-6 text-[#A8D5BA]" />
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
+        <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-500 to-cyan-400 flex items-center justify-center text-slate-950 shadow-xl shadow-sky-500/20 animate-pulse mb-4">
+          <Droplets className="w-7 h-7 text-slate-950" />
         </div>
-        <div className="flex items-center gap-2 text-[#173F32] font-bold text-sm">
-          <RefreshCw className="w-4 h-4 animate-spin text-[#173F32]" />
-          <span>Connecting to AeroFlora Firebase Security...</span>
+        <div className="flex items-center gap-2 text-white font-bold text-sm">
+          <RefreshCw className="w-4 h-4 animate-spin text-sky-400" />
+          <span>Connecting to AeroFlora Security Vault...</span>
         </div>
-        <p className="text-xs text-slate-500 mt-1 font-mono">256-bit Cloud Identity Authentication</p>
+        <p className="text-xs text-slate-400 mt-1 font-mono">256-bit Cloud Identity Authentication · SHA-256 TLS</p>
       </div>
     );
   }
@@ -489,28 +489,31 @@ export default function App() {
       </main>
 
       {/* Operational Footer */}
-      <footer className="mt-12 bg-emerald-950 text-white border-t border-emerald-900 py-6 text-xs">
+      <footer className="mt-12 bg-slate-950 text-slate-400 border-t border-slate-800/80 py-6 text-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-white">AeroFlora Systems</span>
-            <span className="text-emerald-400">·</span>
-            <span className="text-emerald-200">Farm Water Intelligence · Designed for India</span>
+            <span className="font-bold text-white tracking-tight flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
+              AeroFlora Systems
+            </span>
+            <span className="text-slate-600">·</span>
+            <span className="text-slate-300">Agricultural Atmospheric Water Intelligence</span>
           </div>
-          <div className="flex items-center gap-4 text-emerald-300 font-mono text-[11px]">
-            <span>PM-KUSUM Agri-Infra</span>
-            <span aria-hidden="true">·</span>
+          <div className="flex items-center gap-4 text-slate-400 font-mono text-[11px]">
+            <span className="text-emerald-400 font-semibold">PM-KUSUM Component-B</span>
+            <span aria-hidden="true" className="text-slate-700">·</span>
             <button
               type="button"
               onClick={() => setShowReportModal(true)}
-              className="text-emerald-300 hover:text-white underline cursor-pointer"
+              className="text-sky-400 hover:text-sky-300 transition-colors cursor-pointer"
             >
               Academic Dossier &amp; Audit
             </button>
-            <span aria-hidden="true">·</span>
+            <span aria-hidden="true" className="text-slate-700">·</span>
             <button
               type="button"
               onClick={() => setShowDeployModal(true)}
-              className="text-emerald-300 hover:text-white underline cursor-pointer"
+              className="text-sky-400 hover:text-sky-300 transition-colors cursor-pointer"
             >
               Vercel Deployment
             </button>

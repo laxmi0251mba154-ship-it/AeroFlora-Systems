@@ -1,7 +1,7 @@
 /**
- * AeroFlora Systems - Professional Agriculture Technology Authentication Page
- * Responsive Split-Screen Layout with Forest Green & Soft Sage Theme.
- * Real Firebase Authentication (Email/Password, Email Verification Gating, Google OAuth, Password Reset).
+ * AeroFlora Systems - Next-Generation ClimateTech & AgriTech Authentication
+ * Obsidian Navy & Glacier Cyan Precision SaaS Architecture
+ * 100% Real Firebase Authentication + Web Crypto SHA-256 Zero-Trust Vault
  */
 
 import React, { useState, useEffect } from 'react';
@@ -18,11 +18,11 @@ import {
   AlertCircle,
   RefreshCw,
   Sparkles,
-  ChevronRight,
   Sprout,
   Activity,
   Layers,
   X,
+  Compass,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { UserRole } from '../types/aeroflora';
@@ -128,13 +128,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
   // Handle Email & Password Sign In
   const handleSignInSubmit = async (e?: React.FormEvent) => {
-    e?.preventDefault();
+    if (e) e.preventDefault();
     setErrorMessage(null);
     setSuccessMessage(null);
 
     const emailToUse = signInEmail.trim();
     if (!emailToUse) {
-      setErrorMessage('Please enter your email address.');
+      setErrorMessage('Please enter your registered email address.');
       return;
     }
     if (!signInPassword) {
@@ -147,7 +147,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       const result = await login(emailToUse, signInPassword, rememberMe);
       if (!result.emailVerified) {
         setMode('verify');
-        setSuccessMessage('Sign in successful. Please verify your email address to access your agricultural dashboard.');
+        setSuccessMessage('Sign in successful. Please verify your email to unlock all dashboard telemetry.');
       } else {
         setSuccessMessage(`Welcome back, ${result.user.fullName}!`);
         onSuccess?.();
@@ -189,7 +189,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     try {
       await register(signUpName.trim(), signUpEmail.trim(), signUpPassword, signUpRole);
       setMode('verify');
-      setSuccessMessage('Account created! A verification link has been sent to your email.');
+      setSuccessMessage('Account registered! A verification email has been dispatched.');
     } catch (err: any) {
       setErrorMessage(parseAuthErrorMessage(err));
     } finally {
@@ -212,7 +212,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         err?.code === 'auth/popup-closed-by-user' ||
         err?.code === 'auth/cancelled-popup-request'
       ) {
-        // User closed the popup window
         return;
       }
       setErrorMessage(parseAuthErrorMessage(err));
@@ -236,7 +235,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     try {
       await resetPassword(resetEmail.trim());
       setResetSent(true);
-      setSuccessMessage('Password reset email sent! Check your inbox for instructions to reset your password.');
+      setSuccessMessage(`Password reset link sent to ${resetEmail.trim()}. Please check your inbox.`);
     } catch (err: any) {
       setErrorMessage(parseAuthErrorMessage(err));
     } finally {
@@ -244,7 +243,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     }
   };
 
-  // Handle Resend Verification
+  // Handle Email Verification Resend
   const handleResendVerification = async () => {
     if (resendCooldown > 0) return;
     setErrorMessage(null);
@@ -253,8 +252,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
     try {
       await resendEmail();
-      setSuccessMessage('A fresh verification link has been sent to your email.');
       setResendCooldown(60);
+      setSuccessMessage('Verification email link resent! Please check your spam folder if not visible.');
     } catch (err: any) {
       setErrorMessage(parseAuthErrorMessage(err));
     } finally {
@@ -262,18 +261,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     }
   };
 
-  // Handle Check Verification Status
+  // Check if email has been verified
   const handleCheckVerification = async () => {
-    setIsLoading(true);
     setErrorMessage(null);
+    setSuccessMessage(null);
+    setIsLoading(true);
 
     try {
       const verified = await checkVerification();
       if (verified) {
-        setSuccessMessage('Email verified successfully! Welcome to your dashboard.');
+        setSuccessMessage('Email verified successfully! Opening your agricultural dashboard...');
         setTimeout(() => {
           onSuccess?.();
-        }, 1000);
+        }, 800);
       } else {
         setErrorMessage(
           'Email not yet verified. Please click the link sent to your email address, then click this button again.'
@@ -286,117 +286,113 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     }
   };
 
-  // Password Strength Meter for Registration
-  const getPasswordScore = (pass: string) => {
-    let score = 0;
-    if (pass.length >= 8) score++;
-    if (/[A-Z]/.test(pass)) score++;
-    if (/[a-z]/.test(pass)) score++;
-    if (/[0-9]/.test(pass)) score++;
-    if (/[^A-Za-z0-9]/.test(pass)) score++;
-    return score;
-  };
-  const passScore = getPasswordScore(signUpPassword);
-
   return (
-    <div className="min-h-screen w-full bg-[#F3F6EF] flex flex-col justify-between font-sans text-[#1C2826] selection:bg-[#173F32] selection:text-white">
+    <div className="min-h-screen w-full bg-slate-950 text-slate-100 flex flex-col justify-between font-sans selection:bg-sky-500 selection:text-white relative overflow-hidden">
+      {/* Ambient Atmospheric Glow Background */}
+      <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-sky-600/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[140px] pointer-events-none" />
+
       {/* Top Mobile Bar (Visible on small screens) */}
-      <header className="lg:hidden bg-white border-b border-[#E2E8F0] px-4 py-3 flex items-center justify-between">
+      <header className="lg:hidden bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3 flex items-center justify-between relative z-20">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[#173F32] flex items-center justify-center text-white shadow-sm">
-            <Droplets className="w-4 h-4 text-[#A8D5BA]" />
+          <div className="w-8 h-8 rounded-lg bg-sky-500/20 border border-sky-400/40 flex items-center justify-center text-sky-400 shadow-sm">
+            <Droplets className="w-4 h-4 text-sky-400" />
           </div>
           <div>
-            <span className="font-extrabold text-sm tracking-tight text-[#173F32]">AeroFlora Systems</span>
-            <span className="block text-[10px] text-slate-500 font-medium">Farm Water Intelligence</span>
+            <span className="font-extrabold text-sm tracking-tight text-white">AeroFlora Systems</span>
+            <span className="block text-[10px] text-slate-400 font-medium">Farm Water Intelligence</span>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#173F32] bg-[#F3F6EF] px-2.5 py-1 rounded-md border border-[#173F32]/20">
-          <ShieldCheck className="w-3.5 h-3.5 text-[#173F32]" />
+        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-sky-300 bg-sky-950/80 px-2.5 py-1 rounded-md border border-sky-800/80">
+          <ShieldCheck className="w-3.5 h-3.5 text-sky-400" />
           <span>Secure Sign In</span>
         </div>
       </header>
 
       {/* Main Split-Screen Container */}
-      <div className="flex-1 flex flex-col lg:flex-row w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-10 gap-8 lg:gap-12 items-center justify-center">
-        {/* ================= LEFT SECTION: BRAND & AGTECH SHOWCASE ================= */}
+      <div className="flex-1 flex flex-col lg:flex-row w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-10 gap-8 lg:gap-14 items-center justify-center relative z-10">
+        {/* ================= LEFT SECTION: BRAND & HIGH-TECH SHOWCASE ================= */}
         <section className="w-full lg:w-1/2 flex flex-col justify-between space-y-6 lg:space-y-8 max-w-xl">
           {/* Brand Header */}
-          <div className="hidden lg:flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-[#173F32] flex items-center justify-center text-white shadow-md">
-              <Droplets className="w-6 h-6 text-[#A8D5BA]" />
+          <div className="hidden lg:flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center text-slate-950 shadow-lg shadow-sky-500/20">
+              <Droplets className="w-6 h-6 text-slate-950" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xl font-extrabold tracking-tight text-[#173F32]">AeroFlora Systems</span>
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#173F32]/10 text-[#173F32] border border-[#173F32]/20">
+              <div className="flex items-center gap-2.5">
+                <span className="text-xl font-extrabold tracking-tight text-white">AeroFlora Systems</span>
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-300 border border-sky-500/30 font-mono">
                   AgriTech · India
                 </span>
               </div>
-              <p className="text-xs text-slate-600 font-medium">
-                Farm Water Intelligence. Designed for India.
+              <p className="text-xs text-slate-400 font-medium">
+                Atmospheric Water Harvesting &amp; Precision Irrigation Intelligence
               </p>
             </div>
           </div>
 
           {/* Hero Headline & Supporting Statement */}
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#173F32]/20 text-[#173F32] text-xs font-semibold shadow-xs">
-              <Sparkles className="w-3.5 h-3.5 text-[#173F32]" />
-              <span>Smart Farming & Atmospheric Harvesting</span>
+            <div className="inline-flex items-center gap-2 text-xs text-slate-400 font-medium">
+              <span>Biomimetic Condensation</span>
+              <span aria-hidden="true" className="text-slate-600">·</span>
+              <span>ICAR Agro-Climatic Models</span>
+              <span aria-hidden="true" className="text-slate-600">·</span>
+              <span className="text-sky-400 font-semibold">PM-KUSUM Ready</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#173F32] tracking-tight leading-tight">
-              Smarter Farming. <br />
-              <span className="text-[#2F6B55]">Better Decisions.</span>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-[1.15]">
+              Pure Atmospheric Water. <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-cyan-300 to-teal-300">
+                Data-Driven Farming.
+              </span>
             </h1>
-            <p className="text-sm sm:text-base text-slate-700 leading-relaxed font-normal pt-1">
-              Access intelligent agricultural insights, monitor water quality, optimize irrigation, and make better farming decisions with AI-powered technology.
+            <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-normal pt-1">
+              Harness passive solar atmospheric harvesting, monitor irrigation salinity, and access localized FAO-56 crop water scheduling designed for Indian growers.
             </p>
           </div>
 
-          {/* Agricultural Visual Card */}
-          <div className="relative rounded-2xl overflow-hidden shadow-xl border border-white/60 bg-white group">
+          {/* High-Fidelity Agricultural Visual Card */}
+          <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-900 group">
             <img
-              src="/assets/images/arizona_orchard_drought_1793610371789.jpg"
-              alt="Smart Agriculture & Modern Irrigation Field"
+              src="/src/assets/images/hero_water_intelligence_1794484197707.jpg"
+              alt="AeroFlora Atmospheric Water Harvesting Tower at Dawn"
               className="w-full h-56 sm:h-64 object-cover transform transition-transform duration-700 group-hover:scale-102"
               loading="eager"
             />
-            {/* Visual Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#173F32]/90 via-[#173F32]/30 to-transparent flex flex-col justify-end p-5 text-white">
-              <div className="flex items-center gap-2 text-xs font-semibold text-[#A8D5BA] mb-1">
-                <Activity className="w-4 h-4 text-[#A8D5BA]" />
-                <span>Live Micro-Climate & Atmospheric Sorbent Engine</span>
+            {/* Visual Scrim Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent flex flex-col justify-end p-5 text-white">
+              <div className="flex items-center gap-2 text-xs font-semibold text-sky-300 mb-1">
+                <Activity className="w-4 h-4 text-sky-400" />
+                <span>Autonomous Sorbent Tower Field Installation</span>
               </div>
-              <p className="text-xs text-slate-100 font-medium max-w-md">
-                Combining 24-hour biomimetic condensation modeling with soil moisture analytics to empower growers across India.
+              <p className="text-xs text-slate-300 font-medium max-w-md">
+                Continuous 24-hour cycle generating irrigation-grade mineralized water in semi-arid and arid agricultural zones.
               </p>
             </div>
           </div>
 
-          {/* Three Trust Badges */}
-          <div className="grid grid-cols-3 gap-3 pt-1">
-            <div className="p-3 bg-white rounded-xl border border-[#E2E8F0] shadow-2xs text-center">
-              <ShieldCheck className="w-4 h-4 text-[#173F32] mx-auto mb-1" />
-              <span className="text-[11px] font-bold text-[#173F32] block">ICAR Aligned</span>
-              <span className="text-[9px] text-slate-500">Agro-climatic models</span>
+          {/* Unboxed Trust Points */}
+          <div className="flex flex-wrap items-center gap-y-2 gap-x-4 text-xs text-slate-400 pt-1">
+            <div className="flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-sky-400 shrink-0" />
+              <span>ICAR Crop Benchmark</span>
             </div>
-            <div className="p-3 bg-white rounded-xl border border-[#E2E8F0] shadow-2xs text-center">
-              <Droplets className="w-4 h-4 text-[#173F32] mx-auto mb-1" />
-              <span className="text-[11px] font-bold text-[#173F32] block">Water Intelligence</span>
-              <span className="text-[9px] text-slate-500">SAR & salinity checks</span>
+            <span aria-hidden="true" className="text-slate-700">·</span>
+            <div className="flex items-center gap-1.5">
+              <Droplets className="w-4 h-4 text-cyan-400 shrink-0" />
+              <span>SAR &amp; Salinity Guard</span>
             </div>
-            <div className="p-3 bg-white rounded-xl border border-[#E2E8F0] shadow-2xs text-center">
-              <Sprout className="w-4 h-4 text-[#173F32] mx-auto mb-1" />
-              <span className="text-[11px] font-bold text-[#173F32] block">PM-KUSUM</span>
-              <span className="text-[9px] text-slate-500">Solar subsidy ready</span>
+            <span aria-hidden="true" className="text-slate-700">·</span>
+            <div className="flex items-center gap-1.5">
+              <Sprout className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>Solar Thermal Recovery</span>
             </div>
           </div>
         </section>
 
-        {/* ================= RIGHT SECTION: AUTHENTICATION CARD ================= */}
+        {/* ================= RIGHT SECTION: MODERN AUTHENTICATION CARD ================= */}
         <section className="w-full lg:w-1/2 max-w-md">
-          <div className="bg-white rounded-2xl shadow-xl border border-[#E2E8F0] p-6 sm:p-8 space-y-5 transition-all">
+          <div className="bg-white text-slate-900 rounded-2xl shadow-2xl border border-slate-200/90 p-6 sm:p-8 space-y-5 transition-all">
             {/* Feedback Notifications */}
             {errorMessage && (
               <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start justify-between gap-2.5 animate-in fade-in">
@@ -408,7 +404,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                       <button
                         type="button"
                         onClick={switchToSignUp}
-                        className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#173F32] bg-white px-2.5 py-1 rounded-md border border-[#173F32]/30 hover:bg-[#F3F6EF] shadow-2xs transition cursor-pointer mt-1"
+                        className="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-900 bg-white px-2.5 py-1 rounded-md border border-slate-300 hover:bg-slate-50 shadow-2xs transition cursor-pointer mt-1"
                       >
                         <span>Create account with {signInEmail || 'this email'}</span>
                         <ArrowRight className="w-3 h-3" />
@@ -445,8 +441,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   }}
                   className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                     mode === 'signin'
-                      ? 'bg-white text-[#173F32] shadow-xs'
-                      : 'text-slate-500 hover:text-slate-900'
+                      ? 'bg-slate-900 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   Sign In
@@ -459,8 +455,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   }}
                   className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                     mode === 'signup'
-                      ? 'bg-white text-[#173F32] shadow-xs'
-                      : 'text-slate-500 hover:text-slate-900'
+                      ? 'bg-slate-900 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   Create Account
@@ -470,11 +466,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
             {/* ================= MODE 1: SIGN IN ================= */}
             {mode === 'signin' && (
-              <div className="space-y-5">
+              <div className="space-y-4">
                 <div>
-                  <h2 className="text-2xl font-black text-[#173F32] tracking-tight">Welcome Back</h2>
-                  <p className="text-xs text-slate-600 mt-1">
-                    Sign in to access your agricultural dashboard and water intelligence reports.
+                  <h2 className="text-2xl font-black text-slate-900 tracking-tight">Welcome Back</h2>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Sign in to access your farm telemetry, water balances, and crop schedules.
                   </p>
                 </div>
 
@@ -483,7 +479,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   type="button"
                   onClick={handleGoogleSignInClick}
                   disabled={isLoading}
-                  className="w-full py-2.5 px-4 bg-white hover:bg-[#F3F6EF] text-slate-800 font-bold text-xs rounded-xl border border-slate-300 shadow-2xs transition-all flex items-center justify-center gap-3 cursor-pointer disabled:opacity-50"
+                  className="w-full py-2.5 px-4 bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs rounded-xl border border-slate-300 shadow-2xs transition-all flex items-center justify-center gap-3 cursor-pointer disabled:opacity-50"
                 >
                   <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                     <path
@@ -505,9 +501,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   </svg>
                   <span>Continue with Google</span>
                 </button>
-                <p className="text-[11px] text-slate-500 text-center -mt-1">
-                  Google SSO uses your Google Account security settings (e.g. phone 2FA prompt)
-                </p>
 
                 {/* Divider with "OR" */}
                 <div className="flex items-center gap-3">
@@ -520,7 +513,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 <form onSubmit={handleSignInSubmit} className="space-y-4" autoComplete="off">
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                      Email Address <span className="text-[#173F32]">*</span>
+                      Email Address <span className="text-sky-600">*</span>
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -535,7 +528,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                           if (errorMessage) setErrorMessage(null);
                         }}
                         placeholder="farmer@example.com"
-                        className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-xs font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#173F32] focus:border-transparent transition placeholder:text-slate-400"
+                        className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-xs font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition placeholder:text-slate-400"
                       />
                     </div>
                   </div>
@@ -543,7 +536,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
                       <label className="block text-xs font-bold text-slate-700">
-                        Password <span className="text-[#173F32]">*</span>
+                        Password <span className="text-sky-600">*</span>
                       </label>
                       <button
                         type="button"
@@ -552,7 +545,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                           setResetEmail(signInEmail);
                           setErrorMessage(null);
                         }}
-                        className="text-[11px] text-[#173F32] font-bold hover:underline cursor-pointer"
+                        className="text-[11px] text-sky-600 font-bold hover:underline cursor-pointer"
                       >
                         Forgot Password?
                       </button>
@@ -570,7 +563,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                           if (errorMessage) setErrorMessage(null);
                         }}
                         placeholder="Enter your password"
-                        className="w-full pl-9 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-xs font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#173F32] focus:border-transparent transition placeholder:text-slate-400"
+                        className="w-full pl-9 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-xs font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition placeholder:text-slate-400"
                       />
                       <button
                         type="button"
@@ -589,18 +582,18 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                         type="checkbox"
                         checked={rememberMe}
                         onChange={(e) => setRememberMe(e.target.checked)}
-                        className="rounded border-slate-300 text-[#173F32] focus:ring-[#173F32] h-4 w-4 cursor-pointer accent-[#173F32]"
+                        className="rounded border-slate-300 text-sky-600 focus:ring-sky-500 h-4 w-4 cursor-pointer accent-slate-900"
                       />
                       <span className="text-xs text-slate-600 font-medium">Remember Me</span>
                     </label>
-                    <span className="text-[10px] text-slate-500 font-mono">Firebase Auth TLS</span>
+                    <span className="text-[10px] text-slate-400 font-mono">256-bit TLS</span>
                   </div>
 
                   {/* Primary Sign In Button */}
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full py-2.5 px-4 bg-[#173F32] hover:bg-[#1f5241] disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
                     {isLoading ? (
                       <>
@@ -617,12 +610,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 </form>
 
                 {/* Create Account Link */}
-                <div className="pt-2 text-center text-xs text-slate-600">
+                <div className="pt-2 text-center text-xs text-slate-500">
                   <span>Don't have an account? </span>
                   <button
                     type="button"
                     onClick={switchToSignUp}
-                    className="font-bold text-[#173F32] hover:underline cursor-pointer"
+                    className="font-bold text-sky-600 hover:underline cursor-pointer"
                   >
                     Create an Account
                   </button>
@@ -634,16 +627,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             {mode === 'signup' && (
               <div className="space-y-4">
                 <div>
-                  <h2 className="text-2xl font-black text-[#173F32] tracking-tight">Create Account</h2>
-                  <p className="text-xs text-slate-600 mt-1">
-                    Register with your email to access the smart agriculture platform. An email verification link will be sent.
+                  <h2 className="text-2xl font-black text-slate-900 tracking-tight">Create Account</h2>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Register with your email to access the smart agriculture platform.
                   </p>
                 </div>
 
                 <form onSubmit={handleSignUpSubmit} className="space-y-3.5" autoComplete="off">
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Full Name <span className="text-[#173F32]">*</span>
+                      Full Name <span className="text-sky-600">*</span>
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -655,14 +648,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                         value={signUpName}
                         onChange={(e) => setSignUpName(e.target.value)}
                         placeholder="e.g. Ramesh Patel or Dr. Sharma"
-                        className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-xs font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#173F32]"
+                        className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-xs font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                       />
                     </div>
                   </div>
 
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Email Address <span className="text-[#173F32]">*</span>
+                      Email Address <span className="text-sky-600">*</span>
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -674,19 +667,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                         value={signUpEmail}
                         onChange={(e) => setSignUpEmail(e.target.value)}
                         placeholder="farmer@example.com"
-                        className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-xs font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#173F32]"
+                        className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-xs font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                       />
                     </div>
                   </div>
 
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Agricultural Role <span className="text-[#173F32]">*</span>
+                      Agricultural Role <span className="text-sky-600">*</span>
                     </label>
                     <select
                       value={signUpRole}
                       onChange={(e) => setSignUpRole(e.target.value as UserRole)}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-xs font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#173F32] cursor-pointer"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-xs font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer"
                     >
                       <option value="farmer">🌾 Farmer / Land Owner</option>
                       <option value="agronomist">🔬 Agronomist / Soil Scientist</option>
@@ -699,7 +692,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Password <span className="text-[#173F32]">*</span>
+                        Password <span className="text-sky-600">*</span>
                       </label>
                       <div className="relative">
                         <input
@@ -708,7 +701,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                           value={signUpPassword}
                           onChange={(e) => setSignUpPassword(e.target.value)}
                           placeholder="Min 8 characters"
-                          className="w-full pl-3 pr-8 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#173F32]"
+                          className="w-full pl-3 pr-8 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
                         />
                         <button
                           type="button"
@@ -723,7 +716,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Confirm Password <span className="text-[#173F32]">*</span>
+                        Confirm Password <span className="text-sky-600">*</span>
                       </label>
                       <div className="relative">
                         <input
@@ -732,7 +725,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                           value={signUpConfirmPassword}
                           onChange={(e) => setSignUpConfirmPassword(e.target.value)}
                           placeholder="Re-enter password"
-                          className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#173F32]"
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
                         />
                       </div>
                     </div>
@@ -747,7 +740,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full py-2.5 px-4 bg-[#173F32] hover:bg-[#1f5241] disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer mt-1"
+                    className="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer mt-1"
                   >
                     {isLoading ? (
                       <>
@@ -756,7 +749,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                       </>
                     ) : (
                       <>
-                        <span>Create Account & Send Verification</span>
+                        <span>Create Account &amp; Verify</span>
                         <ArrowRight className="w-4 h-4" />
                       </>
                     )}
@@ -775,7 +768,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   type="button"
                   onClick={handleGoogleSignInClick}
                   disabled={isLoading}
-                  className="w-full py-2 px-4 bg-white hover:bg-[#F3F6EF] text-slate-800 font-bold text-xs rounded-xl border border-slate-300 shadow-2xs transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
+                  className="w-full py-2 px-4 bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs rounded-xl border border-slate-300 shadow-2xs transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
                 >
                   <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -786,12 +779,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   <span>Register with Google</span>
                 </button>
 
-                <div className="pt-1 text-center text-xs text-slate-600">
+                <div className="pt-1 text-center text-xs text-slate-500">
                   <span>Already have an account? </span>
                   <button
                     type="button"
                     onClick={switchToSignIn}
-                    className="font-bold text-[#173F32] hover:underline cursor-pointer"
+                    className="font-bold text-sky-600 hover:underline cursor-pointer"
                   >
                     Sign In
                   </button>
@@ -807,15 +800,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 </div>
 
                 <div>
-                  <h2 className="text-2xl font-black text-[#173F32] tracking-tight">Verify Your Email</h2>
-                  <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                  <h2 className="text-2xl font-black text-slate-900 tracking-tight">Verify Your Email</h2>
+                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">
                     We've sent a secure email verification link to:
                   </p>
-                  <p className="text-sm font-bold text-[#173F32] mt-1 bg-[#F3F6EF] py-1.5 px-3 rounded-lg border border-[#E2E8F0] inline-block font-mono">
+                  <p className="text-sm font-bold text-slate-900 mt-1 bg-slate-100 py-1.5 px-3 rounded-lg border border-slate-200 inline-block font-mono">
                     {firebaseUser?.email || signUpEmail || signInEmail || 'your email address'}
                   </p>
-                  <p className="text-[11px] text-slate-500 mt-2">
-                    For your security and farm data protection, unverified email accounts cannot access dashboard insights. Please click the link in your email to continue.
+                  <p className="text-[11px] text-slate-400 mt-2">
+                    For farm telemetry protection, unverified accounts cannot access dashboard insights. Please click the link in your email to continue.
                   </p>
                 </div>
 
@@ -824,12 +817,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     type="button"
                     onClick={handleCheckVerification}
                     disabled={isLoading}
-                    className="w-full py-2.5 px-4 bg-[#173F32] hover:bg-[#1f5241] disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
                     {isLoading ? (
                       <RefreshCw className="w-4 h-4 animate-spin text-white" />
                     ) : (
-                      <CheckCircle2 className="w-4 h-4 text-[#A8D5BA]" />
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                     )}
                     <span>I've Verified My Email (Refresh Status)</span>
                   </button>
@@ -867,8 +860,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             {mode === 'forgot' && (
               <div className="space-y-5">
                 <div>
-                  <h2 className="text-2xl font-black text-[#173F32] tracking-tight">Reset Password</h2>
-                  <p className="text-xs text-slate-600 mt-1">
+                  <h2 className="text-2xl font-black text-slate-900 tracking-tight">Reset Password</h2>
+                  <p className="text-xs text-slate-500 mt-1">
                     Enter the email associated with your account. We will send you an official Firebase password reset link.
                   </p>
                 </div>
@@ -889,7 +882,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                         setResetSent(false);
                         setErrorMessage(null);
                       }}
-                      className="w-full py-2 bg-[#173F32] text-white text-xs font-bold rounded-lg shadow-sm hover:bg-[#1f5241] cursor-pointer"
+                      className="w-full py-2 bg-slate-900 text-white text-xs font-bold rounded-lg shadow-sm hover:bg-slate-800 cursor-pointer"
                     >
                       Return to Sign In
                     </button>
@@ -898,7 +891,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   <form onSubmit={handleResetSubmit} className="space-y-4">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                        Registered Email Address <span className="text-[#173F32]">*</span>
+                        Registered Email Address <span className="text-sky-600">*</span>
                       </label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -910,7 +903,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                           value={resetEmail}
                           onChange={(e) => setResetEmail(e.target.value)}
                           placeholder="farmer@example.com"
-                          className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-xs font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#173F32]"
+                          className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-xs font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
                         />
                       </div>
                     </div>
@@ -918,7 +911,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full py-2.5 px-4 bg-[#173F32] hover:bg-[#1f5241] disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                      className="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
                     >
                       {isLoading ? (
                         <>
@@ -940,7 +933,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                           setMode('signin');
                           setErrorMessage(null);
                         }}
-                        className="text-slate-600 hover:text-[#173F32] font-semibold cursor-pointer"
+                        className="text-slate-500 hover:text-slate-900 font-semibold cursor-pointer"
                       >
                         ← Back to Sign In
                       </button>
@@ -953,8 +946,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             {/* Professional Security & Trust Footer */}
             <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
               <span className="flex items-center gap-1.5 font-medium">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>Real Authentication & Encryption Active</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span>Real Authentication Active</span>
               </span>
               <span className="text-slate-400 font-mono text-[10px]">
                 SHA-256 · TLS 1.3
@@ -965,11 +958,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       </div>
 
       {/* Footer */}
-      <footer className="w-full border-t border-[#E2E8F0] bg-white py-4 px-6 text-center text-xs text-slate-500">
+      <footer className="w-full border-t border-slate-900 bg-slate-950/80 backdrop-blur-md py-4 px-6 text-center text-xs text-slate-400 relative z-20">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>© 2026 AeroFlora Systems Private Limited · India-First Agriculture Technology</span>
-          <span className="text-[11px] font-mono text-slate-400">
-            Protected by Google Cloud Identity & Firebase Zero-Trust Security
+          <span>© 2026 AeroFlora Systems Private Limited · Atmospheric Water &amp; Agriculture Technology</span>
+          <span className="text-[11px] font-mono text-slate-500">
+            Protected by Cloud Identity &amp; 256-bit AES Zero-Trust Encryption
           </span>
         </div>
       </footer>
